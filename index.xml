@@ -6,10 +6,48 @@
     <description>Recent content on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Sun, 13 Oct 2019 19:57:19 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 13 Oct 2019 21:51:59 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Complete Example of Docker Build With Go Module</title>
+      <link>https://clhjoe.github.io/posts/complete-example-of-docker-build-with-go-module/</link>
+      <pubDate>Sun, 13 Oct 2019 21:51:59 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/posts/complete-example-of-docker-build-with-go-module/</guid>
+      <description>前兩篇 使用multi-stage來降低docker image size 及 加速Docker編譯go 程式 ，但透過alpine會缺少一些API必要的ssl或tzdata等等的套件，這篇來分享完整的範例吧～
+dockerfile
+#first stage - builder FROM golang:1.13.1-stretch as builder WORKDIR /api #Step 1. 複製go.mod及go.sum COPY go.mod go.sum ./ #Step 2. 下載所有的dependencies, 只要go.mod和go.sum不變就不需要重新下載相依 RUN go mod download # Step 3. 複製source code並編譯 COPY . . ENV GO111MODULE=on RUN CGO_ENABLED=0 GOOS=linux go build -o api main.go #second stage FROM alpine:latest WORKDIR /root/ #Step 4. 安裝tzdata確保時區(time package)可以正常使用 RUN apk add --no-cache tzdata #Step 5. 複製ca certificates, 確保go 可以正常的連至https的api或網頁 COPY --from=builder /etc/ssl/certs/ca-certificates.</description>
+    </item>
+    
+    <item>
+      <title>Speed Up Docker Build With Go Module</title>
+      <link>https://clhjoe.github.io/posts/speed-up-docker-build-with-go-module/</link>
+      <pubDate>Sun, 13 Oct 2019 21:23:54 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/posts/speed-up-docker-build-with-go-module/</guid>
+      <description>上一篇 說明了如何降低Docker 編譯Go程式產生的image大小，但同時也提到了因為Go 每次都會去抓相依的module導致編譯速度就是慢！有什麼方法可以加速呢？來看看看優化版本
+optimized.Dockerfile
+#first stage - builder FROM golang:1.13.1-stretch as builder WORKDIR /api #Step 1. 複製go.mod及go.sum COPY go.mod go.sum ./ #Step 2. 下載所有的dependencies, 只要go.mod和go.sum不變就不需要重新下載相依 RUN go mod download # Step 3. 複製source code並編譯 COPY . . ENV GO111MODULE=on RUN CGO_ENABLED=0 GOOS=linux go build -o api main.go #second stage FROM alpine:latest WORKDIR /root/ COPY --from=builder /api . CMD [&amp;quot;./api&amp;quot;]  透過Step 1,2 來節省下載相依的時間，試試看吧～
+如同前一篇提及，alpine是精簡的fs, 缺少許多程式需要的library例如tzdata等等，如何寫出完整的Dockerfile呢？請看此</description>
+    </item>
+    
+    <item>
+      <title>Multi Stage Docker Build With Go Module</title>
+      <link>https://clhjoe.github.io/posts/multi-stage-docker-build-with-go-module/</link>
+      <pubDate>Sun, 13 Oct 2019 20:53:48 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/posts/multi-stage-docker-build-with-go-module/</guid>
+      <description>為什麼要使用Multi-stage來編譯Golang？ 假設我們有一個簡單的Golang程式如下
+main.go
+package main import &amp;quot;github.com/gin-gonic/gin&amp;quot; func main() { r := gin.Default() r.GET(&amp;quot;/ping&amp;quot;, func(c *gin.Context) { c.JSON(200, gin.H{ &amp;quot;message&amp;quot;: &amp;quot;pong&amp;quot;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 }  然後我們爲了這支程式寫了個Dockerfile
+Dockerfile
+FROM golang:1.13.1-stretch COPY . /api WORKDIR /api ENV GO111MODULE=on RUN CGO_ENABLED=0 GOOS=linux go build -o api main.go CMD [&amp;quot;./api&amp;quot;]  編譯他吧！
+docker build . -t api  編譯完我們來看一下Image有多大？
+docker images #REPOSITORY TAG IMAGE ID CREATED SIZE #api latest 1f3921830d5a 39 seconds ago 842MB  有沒有搞錯？要842MB?</description>
+    </item>
     
     <item>
       <title>How to Use Hugo</title>

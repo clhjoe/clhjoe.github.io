@@ -3,17 +3,32 @@
   xmlns:xhtml="https://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://clhjoe.github.io/posts/how-to-use-hugo/</loc>
-    <lastmod>2019-10-13T19:57:19+08:00</lastmod>
+    <loc>https://clhjoe.github.io/posts/complete-example-of-docker-build-with-go-module/</loc>
+    <lastmod>2019-10-13T21:51:59+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://clhjoe.github.io/</loc>
-    <lastmod>2019-10-13T19:57:19+08:00</lastmod>
+    <lastmod>2019-10-13T21:51:59+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://clhjoe.github.io/posts/</loc>
+    <lastmod>2019-10-13T21:51:59+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/posts/speed-up-docker-build-with-go-module/</loc>
+    <lastmod>2019-10-13T21:23:54+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/posts/multi-stage-docker-build-with-go-module/</loc>
+    <lastmod>2019-10-13T20:53:48+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/posts/how-to-use-hugo/</loc>
     <lastmod>2019-10-13T19:57:19+08:00</lastmod>
   </url>
   
