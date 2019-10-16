@@ -1,28 +1,23 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speed Up Docker Build With Go Module &middot; Joe&#39;s Notes</title>
 
-    <meta name="description"
-        content="">
+    <meta name="description" content="">
 
     <meta name="generator" content="Hugo 0.58.3" />
     <meta name="twitter:card" content="summary">
     
     <meta name="twitter:title" content="Speed Up Docker Build With Go Module &middot; Joe&#39;s Notes">
-    <meta name="twitter:description"
-        content="">
+    <meta name="twitter:description" content="">
 
     <meta property="og:type" content="article">
     <meta property="og:title" content="Speed Up Docker Build With Go Module &middot; Joe&#39;s Notes">
-    <meta property="og:description"
-        content="">
+    <meta property="og:description" content="">
 
-    <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Oxygen:400,700' rel='stylesheet'
-        type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Oxygen:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/grids-responsive-min.css">
 
@@ -31,8 +26,8 @@
 
     <link rel="alternate" type="application/rss+xml" title="Joe&#39;s Notes" href='https://clhjoe.github.io/index.xml' />
 </head>
-
 <body>
+
 
 <div id="layout" class="pure-g">
     <div class="sidebar pure-u-1 pure-u-md-1-4">
@@ -98,7 +93,9 @@
                     </div>
                     
                     <div class="post-description">
-                        <p><a href="https://clhjoe.github.io/posts/multi-stage-docker-build-with-go-module/">上一篇</a> 說明了如何降低Docker 編譯Go程式產生的image大小，但同時也提到了因為Go 每次都會去抓相依的module導致編譯速度就是慢！有什麼方法可以加速呢？來看看看優化版本</p>
+                        <p><a href="https://clhjoe.github.io/posts/multi-stage-docker-build-with-go-module/">上一篇</a> 說明了如何降低Docker 編譯Go程式產生的image大小，但同時也提到了因為Go 每次都會去抓相依的module導致編譯速度就是慢！
+<img src="https://pg-media.ksmobile.com/production/material/file/all_90/1571203055.png" alt="go mod download" />
+有什麼方法可以加速呢？來看看看優化版本</p>
 
 <p><strong>optimized.Dockerfile</strong></p>
 
