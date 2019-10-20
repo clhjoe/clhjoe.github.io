@@ -3,17 +3,22 @@
   xmlns:xhtml="https://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://clhjoe.github.io/posts/complete-example-of-docker-build-with-go-module/</loc>
-    <lastmod>2019-10-13T21:51:59+08:00</lastmod>
+    <loc>https://clhjoe.github.io/</loc>
+    <lastmod>2019-10-20T19:26:31+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://clhjoe.github.io/</loc>
-    <lastmod>2019-10-13T21:51:59+08:00</lastmod>
+    <loc>https://clhjoe.github.io/posts/migrate-api-to-go/</loc>
+    <lastmod>2019-10-20T19:26:31+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://clhjoe.github.io/posts/</loc>
+    <lastmod>2019-10-20T19:26:31+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/posts/complete-example-of-docker-build-with-go-module/</loc>
     <lastmod>2019-10-13T21:51:59+08:00</lastmod>
   </url>
   

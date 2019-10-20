@@ -3,18 +3,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How to Use Hugo &middot; Joe&#39;s Notes</title>
+    <title>Migrate API to Go &middot; Joe&#39;s Notes</title>
 
     <meta name="description" content="">
 
     <meta name="generator" content="Hugo 0.58.3" />
     <meta name="twitter:card" content="summary">
     
-    <meta name="twitter:title" content="How to Use Hugo &middot; Joe&#39;s Notes">
+    <meta name="twitter:title" content="Migrate API to Go &middot; Joe&#39;s Notes">
     <meta name="twitter:description" content="">
 
     <meta property="og:type" content="article">
-    <meta property="og:title" content="How to Use Hugo &middot; Joe&#39;s Notes">
+    <meta property="og:title" content="Migrate API to Go &middot; Joe&#39;s Notes">
     <meta property="og:description" content="">
 
     <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Oxygen:400,700' rel='stylesheet' type='text/css'>
@@ -70,11 +70,11 @@
         <div>
             
             <div class="posts">
-                <h1 class="content-subhead">13 Oct 2019, 19:57</h1>
+                <h1 class="content-subhead">20 Oct 2019, 19:26</h1>
                 <section class="post">
                     <header class="post-header">
 
-                        <a href="https://clhjoe.github.io/posts/how-to-use-hugo/" class="post-title">How to Use Hugo</a>
+                        <a href="https://clhjoe.github.io/posts/migrate-api-to-go/" class="post-title">Migrate API to Go</a>
 
                         <p class="post-meta">
                             
@@ -95,87 +95,115 @@
                     <div class="post-description">
                         
 
-<h2 id="甚麼是hugo">甚麼是Hugo?</h2>
-
-<p>Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了。</p>
-
-<h2 id="安裝hugo">安裝Hugo</h2>
-
-<p><strong>For Mac</strong></p>
-
-<pre><code class="language-shell">brew install hugo
-</code></pre>
-
-<p><strong>For Linux</strong></p>
-
-<pre><code class="language-shell">snap install hugo --channel=extended
-
-or 
-
-sudo apt-get install hugo
-
-</code></pre>
-
-<h2 id="建立新的網站">建立新的網站</h2>
-
-<pre><code class="language-sh">#將new-site 替代成你要的網站名稱
-hugo new site new-site
-</code></pre>
-
-<h2 id="使用theme">使用Theme</h2>
-
-<pre><code class="language-shell">#將new-site 替代成你的網站名稱,這裡以anake為例。
-cd new-site
-git init
-git submodule add https://github.com/budparr/gohugo-theme-ananke.git themes/ananke
-echo 'theme = &quot;ananke&quot;' &gt;&gt; config.toml
-</code></pre>
-
-<p>更多的Theme可以到 <a href="https://themes.gohugo.io/">https://themes.gohugo.io/</a> 參考</p>
-
-<h2 id="新增一篇內文">新增一篇內文</h2>
-
-<pre><code class="language-shell">hugo new posts/my-first-post.md
-</code></pre>
-
-<p>執行後會在content/posts/ 產生這份md檔，直接編輯內容就好了。如果要刪除這篇文章，也可以直接刪除檔案即可。</p>
-
-<h2 id="預覽一下網站吧">預覽一下網站吧</h2>
-
-<pre><code class="language-shell">hugo server -D
-</code></pre>
-
-<p>執行後打開瀏覽器，輸入 <a href="https://localhost:1313/">https://localhost:1313/</a> 就可以預覽你的網站啦～</p>
-
-<h2 id="放置到github">放置到github</h2>
-
-<p>這邊比較tricky。假設你的github帳號是handsomeboy, 如果要把文章放到handsomeboy.github.io，你必須建立<strong>handsomeboy.github.io</strong> 這個repo然後把public這個資料夾(而非整個hugo網站資料夾)推到這個repo。那hugo資料夾的git要怎麼辦呢？你可以再建個repo放整個hugo資料夾。因此更新一個文章，你必須push到兩個repo～</p>
+<p>大家應該或多或少都有經驗要將某個語言實做的API搬到另一種語言重寫。原因總是有千千百百種，但是有時候當專案很大，沒辦法一次搬完的時候又該怎麼辦呢？分享一下我們的例子，原先的API是使用PHP來撰寫，但因為幾個原因所以我們決定把他搬到Golang。</p>
 
 <ol>
-<li>建立 <strong>handsomeboy.github.io</strong>(handsomeboy記得換成妳自己的帳號名稱) 及 hugo-web兩個repo。</li>
+<li>原始PHP版本留在PHP 5.3，是一個效能不好(compare to PHP 7)以及不被維護的版本，要升級得顧慮沒有人維護的framework所以是個大工程。</li>
+<li>因為業務的需要，一個API request有很多平行可以處理的事情，如果一步步來其實速度慢又浪費資源。</li>
+<li>我們原始業務一直是使用Golang，所以也很熟了。</li>
+</ol>
 
-<li><p>將public資料夾推到 <strong>handsomeboy.github.io</strong></p>
+<p>因此最後決定新的API就以Golang撰寫，有需要動到舊有的API且時間足夠再搬到Golang。這時候就遇到一個問題啦，同時兩套語言寫成的API要怎麼共存的？分成幾個維度來看～</p>
 
-<pre><code class="language-shell">hugo   #將md檔轉成靜態資料
-cd public
-git init
-git remote add origin git@github.com:handsomeboy/handsomeboy.github.io.git
-git add .
-git commit 
-git push -u origin master
-   
-#push完後打開瀏覽器輸入 https://handsomeboy.github.io 應該就要可以看到你的文章啦～(如果沒看到可以檢查一下.md檔，記得把開頭的drafte改成false) 
+<h2 id="切分域名">切分域名</h2>
 
-</code></pre></li>
+<table>
+<thead>
+<tr>
+<th>考量維度</th>
+<th align="center">切分域名</th>
+<th align="right">使用同個域名但routing切開</th>
+</tr>
+</thead>
 
-<li><p>將hugo送進git</p>
+<tbody>
+<tr>
+<td>修改舊有API</td>
+<td align="center"><img width=20/>只有新版的APP才會使用到新的API。舊版用戶得等版本到達率整個慘。</td>
+<td align="right"><img width=20/>因為API path不變，因此新舊版同時生效</td>
+</tr>
 
-<pre><code class="language-shell">cd ..
-git remote add origin git@github.com:handsomeboy/hugo-web.git
-git add .
-git commit 
-git push -u origin master
-</code></pre></li>
+<tr>
+<td>新增API</td>
+<td align="center">直接切開，清爽</td>
+<td align="right">透過設定routing來切分，比較瑣碎</td>
+</tr>
+</tbody>
+</table>
+
+<p>因為我們必須讓使用舊版的用戶也可以馬上生效，最後我們選擇使用同個域名。如果不在乎這個，其實切分域名還是比較方便的。</p>
+
+<h2 id="切分routing">切分Routing</h2>
+
+<h3 id="透過cdn切分">透過CDN切分</h3>
+
+<p><img src="https://pg-media.ksmobile.com/production/material/file/all_92/1571574856.png" alt="透過Cloudfront可以將不同的PATH Route到不同的Origin" /></p>
+
+<h3 id="透過nginx切分">透過Nginx切分</h3>
+
+<pre><code># /v1/user forward到PHP
+location /v1/user {
+    proxy_set_header X-Request-Id $request_id;
+	if (!-e $request_filename) {
+		rewrite ^/(.*)$ /index.php last;
+	}
+}
+# /v1/user/points 則forward到golang
+location  /v1/user/points {
+    proxy_set_header X-Request-Id $request_id;
+	proxy_pass https://localhost:19002;
+}
+
+</code></pre>
+
+<h3 id="透過golang切分">透過Golang切分</h3>
+
+<p>這邊以Gin為例</p>
+
+<pre><code class="language-go">
+package main
+
+import &quot;github.com/gin-gonic/gin&quot;
+
+func main() {
+	r := gin.Default()
+	r.GET(&quot;/ping&quot;, func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			&quot;message&quot;: &quot;pong&quot;,
+		})
+    })
+    //放你所有的API
+    //...
+    
+    //當上面的PATH都沒命中則pass到PHP
+    r.NoRoute(func(c *gin.Context) {
+		director := func(req *http.Request) {
+			req.URL.Scheme = &quot;http&quot;
+			req.Header.Add(&quot;Host&quot;, &quot;php.api&quot;)//php.api替換成你的PHP url
+			req.Host = &quot;php.api&quot; //同上
+		}
+		proxy := &amp;httputil.ReverseProxy{Director: director}
+		proxy.ServeHTTP(c.Writer, c.Request)
+	})
+	r.Run() // listen and serve on 0.0.0.0:8080
+}
+
+</code></pre>
+
+<p>最後比較一下不同方法的優缺點</p>
+
+<ol>
+<li><p>在CDN切
+<br><strong>好處：</strong>像Cloudfront可以提供route到不同的origin, 分別設ttl, cache條件等等很方便。
+<br><strong>壞處：</strong>換CDN或不同國家使用不同的CDN就GG，不是每家CDN都支援。每次有新的API都得確認一次routing很煩</p></li>
+
+<li><p>前面放個Proxy e.g.Nginx
+<br><strong>好處：</strong> Nginx熟悉的人很多，也很直覺
+<br><strong>壞處：</strong> 每次有新的API都得確認一次routing，量一多挺亂的</p></li>
+
+<li><p>在Golang裡面切
+<br><strong>好處：</strong> 在程式裡設routing，都不中則proxy到PHP，不須額外設定第三方或其他套件
+<br><strong>壞處：</strong> 要寫程式＠＠？</p></li>
 </ol>
 
                     </div>
