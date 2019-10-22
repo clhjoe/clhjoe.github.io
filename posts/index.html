@@ -71,6 +71,54 @@
             
             <div class="posts">
                 
+                <h1 class="content-subhead">22 Oct 2019, 10:53</h1>
+                <section class="post">
+                    <header class="post-header">
+
+                        <a href="https://clhjoe.github.io/posts/useful-curl-alias/" class="post-title">Useful Curl Alias</a>
+
+                        <p class="post-meta">
+                            
+                            
+                        </p>
+                    </header>
+
+                    <div class="post-description">
+                        <p>常常會需要去檢查API的狀態，包含response header及response body。所以一個好用的command組合可以讓你輕鬆一點</p>
+
+<pre><code>echo alias c='curl -s --dump-header /dev/stderr' &gt;&gt; ~/.bashrc
+source ~/.bashrc
+
+</code></pre>
+
+<p><strong>實際使用</strong></p>
+
+<pre><code>c 'https://api.ipify.org?format=json'|jq
+
+or 
+
+c 'https://api.ipify.org?format=json'|jq .ip
+</code></pre>
+
+<pre><code>joe@server:~$ c 'https://api.ipify.org?format=json'|jq 
+HTTP/1.1 200 OK
+Server: Cowboy
+Connection: keep-alive
+Content-Type: application/json
+Vary: Origin
+Date: Tue, 22 Oct 2019 02:57:35 GMT
+Content-Length: 23
+Via: 1.1 vegur
+
+{
+  &quot;ip&quot;: &quot;115.237.31.60&quot;
+}
+
+</code></pre>
+
+                    </div>
+                </section>
+                
                 <h1 class="content-subhead">20 Oct 2019, 19:26</h1>
                 <section class="post">
                     <header class="post-header">

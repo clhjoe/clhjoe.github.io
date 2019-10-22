@@ -6,10 +6,21 @@
     <description>Recent content in Posts on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Sun, 20 Oct 2019 19:26:31 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 22 Oct 2019 10:53:54 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Useful Curl Alias</title>
+      <link>https://clhjoe.github.io/posts/useful-curl-alias/</link>
+      <pubDate>Tue, 22 Oct 2019 10:53:54 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/posts/useful-curl-alias/</guid>
+      <description>常常會需要去檢查API的狀態，包含response header及response body。所以一個好用的command組合可以讓你輕鬆一點
+echo alias c=&#39;curl -s --dump-header /dev/stderr&#39; &amp;gt;&amp;gt; ~/.bashrc source ~/.bashrc  實際使用
+c &#39;https://api.ipify.org?format=json&#39;|jq or c &#39;https://api.ipify.org?format=json&#39;|jq .ip  joe@server:~$ c &#39;https://api.ipify.org?format=json&#39;|jq HTTP/1.1 200 OK Server: Cowboy Connection: keep-alive Content-Type: application/json Vary: Origin Date: Tue, 22 Oct 2019 02:57:35 GMT Content-Length: 23 Via: 1.1 vegur { &amp;quot;ip&amp;quot;: &amp;quot;115.237.31.60&amp;quot; }  </description>
+    </item>
     
     <item>
       <title>Migrate API to Go</title>
