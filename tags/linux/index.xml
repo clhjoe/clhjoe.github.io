@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
   <channel>
-    <title>Linux on Joe&#39;s Notes</title>
+    <title>linux on Joe&#39;s Notes</title>
     <link>https://clhjoe.github.io/tags/linux/</link>
-    <description>Recent content in Linux on Joe&#39;s Notes</description>
+    <description>Recent content in linux on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
     <lastBuildDate>Tue, 22 Oct 2019 10:53:54 +0800</lastBuildDate>

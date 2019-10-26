@@ -3,8 +3,58 @@
   xmlns:xhtml="https://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://clhjoe.github.io/tags/aws/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/go/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/golang/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://clhjoe.github.io/</loc>
-    <lastmod>2019-10-22T10:53:54+08:00</lastmod>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/mysql/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/network/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/post/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/rds/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/timeout/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/post/cause-of-connection-timeout/</loc>
+    <lastmod>2019-10-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -13,17 +63,7 @@
   </url>
   
   <url>
-    <loc>https://clhjoe.github.io/post/</loc>
-    <lastmod>2019-10-22T10:53:54+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://clhjoe.github.io/tags/shell/</loc>
-    <lastmod>2019-10-22T10:53:54+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://clhjoe.github.io/tags/</loc>
     <lastmod>2019-10-22T10:53:54+08:00</lastmod>
   </url>
   
@@ -48,22 +88,7 @@
   </url>
   
   <url>
-    <loc>https://clhjoe.github.io/tags/aws/</loc>
-    <lastmod>2019-10-20T19:26:31+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://clhjoe.github.io/tags/cloudfront/</loc>
-    <lastmod>2019-10-20T19:26:31+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://clhjoe.github.io/tags/go/</loc>
-    <lastmod>2019-10-20T19:26:31+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://clhjoe.github.io/tags/golang/</loc>
     <lastmod>2019-10-20T19:26:31+08:00</lastmod>
   </url>
   
