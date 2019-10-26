@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta property="og:site_name" content="Joe&#39;s Notes">
+    <meta property="og:type" content="article">
+
+    
+    <meta property="og:image" content="https://clhjoe.github.io//https://pg-media.ksmobile.com/photo/middle/pg/20190529/7801925042630819841105394904.jpg">
+    <meta property="twitter:image" content="https://clhjoe.github.io//https://pg-media.ksmobile.com/photo/middle/pg/20190529/7801925042630819841105394904.jpg" />
+    
+
+    
+    <meta name="title" content="Migrate API to Go" />
+    <meta property="og:title" content="Migrate API to Go" />
+    <meta property="twitter:title" content="Migrate API to Go" />
+    
+
+    
+    <meta name="description" content="大家應該或多或少都有經驗要將某個語言實做的API搬到另一種語言重寫。原因總是有千千百百種，但是有時候當專案很大，沒辦法一次搬完的時候又該怎麼辦呢？分享一下我們的例子。原先的API是使用PHP來撰寫，但因為幾個原因所以我們決定把他搬到Golang。這裡分享我們搬到Golang的前因後果及方案分析。">
+    <meta property="og:description" content="大家應該或多或少都有經驗要將某個語言實做的API搬到另一種語言重寫。原因總是有千千百百種，但是有時候當專案很大，沒辦法一次搬完的時候又該怎麼辦呢？分享一下我們的例子。原先的API是使用PHP來撰寫，但因為幾個原因所以我們決定把他搬到Golang。這裡分享我們搬到Golang的前因後果及方案分析。" />
+    <meta property="twitter:description" content="大家應該或多或少都有經驗要將某個語言實做的API搬到另一種語言重寫。原因總是有千千百百種，但是有時候當專案很大，沒辦法一次搬完的時候又該怎麼辦呢？分享一下我們的例子。原先的API是使用PHP來撰寫，但因為幾個原因所以我們決定把他搬到Golang。這裡分享我們搬到Golang的前因後果及方案分析。" />
+    
+
+    
+    <meta property="twitter:card" content="summary" />
+    
+    
+
+    <meta name="keyword"  content="backend,aws,docker,golang,tech,">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Migrate API to Go-Joe 的備忘錄 | Joe&#39;s Blog</title>
+
+    <link rel="canonical" href="/post/migrate-api-to-go/">
+
+    <link rel="stylesheet" href="/css/iDisqus.min.css"/>
+	
+    
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    
+    <link rel="stylesheet" href="/css/syntax.css">
+    
+    
+    <link rel="stylesheet" href="/css/zanshang.css">
+    
+    
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    
+    
+
+    
+    
+    <script src="/js/jquery.min.js"></script>
+    
+    
+    <script src="/js/bootstrap.min.js"></script>
+    
+    
+    <script src="/js/hux-blog.min.js"></script>
+
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/docco.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    
+    
+
+</head>
+
+
+
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Joe&#39;s Notes</a>
+        </div>
+
+        
+        
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    
+		    
+
+                    
+                </ul>
+            </div>
+        </div>
+        
+    </div>
+    
+</nav>
+<script>
+    
+    
+    
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        
+            $navbar.className = " ";
+            
+            setTimeout(function(){
+                
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://pg-media.ksmobile.com/photo/middle/pg/20190529/7801925042630819841105394904.jpg')
+    }
+</style>
+<header class="intro-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/tips" title="tips">
+                            tips
+                        </a>
+                        
+                        <a class="tag" href="/tags/golang" title="golang">
+                            golang
+                        </a>
+                        
+                        <a class="tag" href="/tags/architecture" title="architecture">
+                            architecture
+                        </a>
+                        
+                        <a class="tag" href="/tags/aws" title="aws">
+                            aws
+                        </a>
+                        
+                        <a class="tag" href="/tags/cloudfront" title="cloudfront">
+                            cloudfront
+                        </a>
+                        
+                        <a class="tag" href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        <a class="tag" href="/tags/proxy" title="proxy">
+                            proxy
+                        </a>
+                        
+                        <a class="tag" href="/tags/go" title="go">
+                            go
+                        </a>
+                        
+                    </div>
+                    <h1>Migrate API to Go</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by 
+                        
+                                Joe&#39;s Notes
+                         
+                        on 
+                        Sunday, October 20, 2019
+                        
+                        
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<article>
+    <div class="container">
+        <div class="row">
+
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#前言">前言</a></li>
+<li><a href="#切分域名">切分域名</a>
+<ul>
+<li><a href="#優缺點分析">優缺點分析</a>
+<ul>
+<li><a href="#優點">優點</a></li>
+<li><a href="#缺點">缺點</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#切分routing">切分Routing</a>
+<ul>
+<li><a href="#透過cdn切分">透過CDN切分</a></li>
+<li><a href="#透過proxy-nginx-切分">透過Proxy(Nginx)切分</a></li>
+<li><a href="#在golang裡切分">在Golang裡切分</a></li>
+</ul></li>
+<li><a href="#方案分析及結論">方案分析及結論</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<h2 id="前言">前言</h2>
+
+<p>大家應該或多或少都有經驗要將某個語言實做的API搬到另一種語言重寫。原因總是有千千百百種，但是有時候當專案很大，沒辦法一次搬完的時候又該怎麼辦呢？分享一下我們的例子。<br>
+原先的API是使用PHP來撰寫，但因為幾個原因所以我們決定把他搬到Golang。</p>
+
+<ol>
+<li>原始PHP版本留在PHP 5.3，是一個效能不好(compare to PHP 7)以及不被維護的版本。要升級得顧慮沒有人維護的framework，所以是個大工程。</li>
+<li>因為業務的需要，一個API request有很多可以平行化處理的事情，如果一步步來其實速度慢又浪費資源，改用Golang可以帶來大幅度的效能提昇。</li>
+<li>我們原始業務一直是使用Golang，在QPS &gt; 2w的環境上驗證過，所以成熟度完全不是問題。</li>
+</ol>
+
+<p>因此最後決定新的API就以Golang撰寫，有需要動到舊有的API且時間足夠再搬到Golang。這時候就遇到一個問題啦，同時兩套語言寫成的API要怎麼共存的？當時想到透過切分域名或切分request path也就是routing來達成，分成幾個維度來看～</p>
+
+<h2 id="切分域名">切分域名</h2>
+
+<p>切分域名就如字面上的意思，舊的API用原有的域名，新的API用心的域名。簡單明瞭不囉唆。但同時也有不便之處。</p>
+
+<h3 id="優缺點分析">優缺點分析</h3>
+
+<h4 id="優點">優點</h4>
+
+<ul>
+<li>新舊API切分乾淨，新的API不會影響舊版的APP。</li>
+<li>針對新舊API可以有完全不同的API設定，例如快取規則、HTTPS的SSL版本、及開啟HTTP/2等等</li>
+</ul>
+
+<h4 id="缺點">缺點</h4>
+
+<ul>
+<li>如果僅僅是想要優化API以Golang改寫，將只有新版的APP用戶會拉取，而一般APP的版本到達率&hellip;慘</li>
+<li>萬一同個API以Golang實做了，在未來如果要更改邏輯則必須兩個語言都要同時更改，增加開發及測試的複雜度
+<br /></li>
+</ul>
+
+<h2 id="切分routing">切分Routing</h2>
+
+<h3 id="透過cdn切分">透過CDN切分</h3>
+
+<p>以Cloudfront為例，透過Cloudfront可以將不同的PATH Route到不同的Origin，甚至我們可以針對不同的PATH設定不同的快取時間、通訊協定、要cache的query parameter或header等等。
+<img src="https://pg-media.ksmobile.com/production/material/file/all_92/1571574856.png" style="height:550px"></img></p>
+
+<h3 id="透過proxy-nginx-切分">透過Proxy(Nginx)切分</h3>
+
+<p>我們可以在Proxy例如Nginx來設定不同的PATH要使用PHP或者是forward到Go API。</p>
+<div class="highlight"><pre class="chroma"><code class="language-nginx" data-lang="nginx"><span class="c1"># /v1/user forward到PHP
+</span><span class="c1"></span><span class="k">location</span> <span class="s">/v1/user</span> <span class="p">{</span>
+	<span class="kn">if</span> <span class="s">(!-e</span> <span class="nv">$request_filename</span><span class="s">)</span> <span class="p">{</span>
+		<span class="kn">rewrite</span> <span class="s">^/(.*)</span>$ <span class="s">/index.php</span> <span class="s">last</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+<span class="c1"># /v1/user/points 則forward到golang
+</span><span class="c1"></span><span class="k">location</span>  <span class="s">/v1/user/points</span> <span class="p">{</span>
+	<span class="kn">proxy_pass</span> <span class="s">https://localhost:19002</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+<h3 id="在golang裡切分">在Golang裡切分</h3>
+
+<p>這邊以Gin為例，我們把所有的request都導到Go API，如果API在golang裡面有實做則直接由GO處理，否則就proxy到原有的PHP API處理</p>
+<div class="highlight"><pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="s">&#34;github.com/gin-gonic/gin&#34;</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">r</span> <span class="o">:=</span> <span class="nx">gin</span><span class="p">.</span><span class="nf">Default</span><span class="p">()</span>
+	<span class="nx">r</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/ping&#34;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">H</span><span class="p">{</span>
+			<span class="s">&#34;message&#34;</span><span class="p">:</span> <span class="s">&#34;pong&#34;</span><span class="p">,</span>
+		<span class="p">})</span>
+    <span class="p">})</span>
+    <span class="c1">//放你所有的API
+</span><span class="c1"></span>    <span class="c1">//...
+</span><span class="c1"></span>    
+    <span class="c1">//當上面的PATH都沒命中則pass到PHP
+</span><span class="c1"></span>    <span class="nx">r</span><span class="p">.</span><span class="nf">NoRoute</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nx">director</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">req</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+			<span class="nx">req</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">Scheme</span> <span class="p">=</span> <span class="s">&#34;http&#34;</span><span class="c1">//使用http省下ssl解析時間
+</span><span class="c1"></span>			<span class="nx">req</span><span class="p">.</span><span class="nx">Header</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="s">&#34;Host&#34;</span><span class="p">,</span> <span class="s">&#34;php-api.xxx.com&#34;</span><span class="p">)</span><span class="c1">//php.api替換成你的PHP url
+</span><span class="c1"></span>			<span class="nx">req</span><span class="p">.</span><span class="nx">Host</span> <span class="p">=</span> <span class="s">&#34;php-api.xxx.com&#34;</span> <span class="c1">//同上
+</span><span class="c1"></span>		<span class="p">}</span>
+		<span class="nx">proxy</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">httputil</span><span class="p">.</span><span class="nx">ReverseProxy</span><span class="p">{</span><span class="nx">Director</span><span class="p">:</span> <span class="nx">director</span><span class="p">}</span>
+		<span class="nx">proxy</span><span class="p">.</span><span class="nf">ServeHTTP</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Writer</span><span class="p">,</span> <span class="nx">c</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span>
+	<span class="p">})</span>
+	<span class="nx">r</span><span class="p">.</span><span class="nf">Run</span><span class="p">()</span> <span class="c1">// listen and serve on 0.0.0.0:8080
+</span><span class="c1"></span><span class="p">}</span></code></pre></div>
+<h2 id="方案分析及結論">方案分析及結論</h2>
+
+<table>
+<thead>
+<tr>
+<th align="left">考量維度</th>
+<th align="center">切分域名</th>
+<th align="right">使用同個域名但routing切開</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">修改舊有API</td>
+<td align="center">只有新版的APP才會使用到新的API。舊版用戶得等版本到達率整個慘。</td>
+<td align="right">因為API path不變，因此新舊版同時生效</td>
+</tr>
+
+<tr>
+<td align="left">新增API</td>
+<td align="center">直接切開，清爽</td>
+<td align="right">透過設定routing來切分，比較瑣碎</td>
+</tr>
+</tbody>
+</table>
+
+<p>因為我們必須讓使用舊版的用戶也可以馬上生效，最後我們選擇使用同個域名。如果不在乎這個，其實切分域名還是比較方便的。</p>
+
+<p>最後比較一下透過PATH切分不同方法的優缺點：</p>
+
+<ol>
+<li><p>在CDN切
+<br><strong>好處：</strong>像Cloudfront可以提供route到不同的origin, 分別設ttl, cache條件等等很方便。
+<br><strong>壞處：</strong>換CDN或不同國家使用不同的CDN就GG，不是每家CDN都支援。每次有新的API都得確認一次routing很煩</p></li>
+
+<li><p>前面放個Proxy e.g.Nginx
+<br><strong>好處：</strong> Nginx熟悉的人很多，也很直覺
+<br><strong>壞處：</strong> 每次有新的API都得確認一次routing，量一多挺亂的</p></li>
+
+<li><p>在Golang裡面切
+<br><strong>好處：</strong> 在程式裡設routing，都不中則proxy到PHP，不須額外設定第三方或其他套件
+<br><strong>壞處：</strong> 要寫程式＠＠？</p></li>
+</ol>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「您的支持是創作的原動力」</p>
+	
+	<button class="zs show-zs btn btn-bred">贊助支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://clhjoe.github.io/"><img src="/img/favicon.ico" />Joe&#39;s Notes</a></span>
+        
+	        <p class="tip"><i></i><span>您的支持是創作的原動力</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="20">20元</button>
+			<button class="btn btn-blink" data-num="40">40元</button>
+			<button class="btn btn-blink" data-num="80">80元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">Wechat(微信))</span>掃描QR Code贊助我吧！</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/complete-example-of-docker-build-with-go-module/" data-toggle="tooltip" data-placement="top" title="Complete Example of Docker Build With Go Module">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/useful-curl-alias/" data-toggle="tooltip" data-placement="top" title="Useful Curl Alias">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                
+<div id="disqus-comment"></div>
+
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "joes-blog-4" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+
+            </div>
+            
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                        
+                        
+                        <a href="/tags/architecture" title="architecture">
+                            architecture
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/aws" title="aws">
+                            aws
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/cloudfront" title="cloudfront">
+                            cloudfront
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/go" title="go">
+                            go
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/go-module" title="go-module">
+                            go-module
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/golang" title="golang">
+                            golang
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/hugo" title="hugo">
+                            hugo
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/linux" title="linux">
+                            linux
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/multi" title="multi">
+                            multi
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/proxy" title="proxy">
+                            proxy
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/stage" title="stage">
+                            stage
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/tips" title="tips">
+                            tips
+                        </a>
+                        
+                        
+                        
+                        <a href="/tags/tool" title="tool">
+                            tool
+                        </a>
+                        
+                        
+                    </div>
+                </section>
+                
+
+                
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                   
+                   <li>
+                       <a href='' rel="alternate" type="application/rss+xml" title="Joe&#39;s Notes" >
+                           <span class="fa-stack fa-lg">
+                               <i class="fa fa-circle fa-stack-2x"></i>
+                               <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                           </span>
+                       </a>
+                   </li>
+                   
+                    
+                    
+                    
+                    
+                    
+
+                    
+
+		    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/clhjoe">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://www.linkedin.com/in/%e6%99%ba%e9%9c%96-%e9%bb%83-00594981">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+		    
+                    
+                    
+                    
+                    
+                    
+                </ul>
+		<p class="copyright text-muted">
+                    Copyright &copy; Joe&#39;s Notes 2019
+                    <br>
+                    <a href="https://themes.gohugo.io/hugo-theme-cleanwhite">CleanWhite Hugo Theme</a> by <a href="https://zhaohuabing.com">Huabing</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=zhaohuabing&repo=hugo-theme-cleanwhite&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+
+
+
+
+<script>
+    
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+
+<script>
+    async("https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+
+
+
+
+</body>
+</html>

@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="" />
-    <meta property="og:title" content="" />
-    <meta property="twitter:title" content="" />
+    <meta name="title" content="Useful Curl Alias" />
+    <meta property="og:title" content="Useful Curl Alias" />
+    <meta property="twitter:title" content="Useful Curl Alias" />
     
 
     
-    <meta name="description" content="備忘錄..">
-    <meta property="og:description" content="備忘錄.." />
-    <meta property="twitter:description" content="備忘錄.." />
+    <meta name="description" content=" 常常用curl &amp; jq來Debug？好用的組合技讓你事倍功半">
+    <meta property="og:description" content=" 常常用curl &amp; jq來Debug？好用的組合技讓你事倍功半" />
+    <meta property="twitter:description" content=" 常常用curl &amp; jq來Debug？好用的組合技讓你事倍功半" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="backend,aws,docker,golang,tech,">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>Tags-Joe 的備忘錄 | Joe&#39;s Blog</title>
+    <title>Useful Curl Alias-Joe 的備忘錄 | Joe&#39;s Blog</title>
 
-    <link rel="canonical" href="/tags/">
+    <link rel="canonical" href="/post/useful-curl-alias/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -146,14 +146,49 @@
 
 
 
-<header class="intro-header" style="background-image: url('https://pg-media.ksmobile.com/photo/middle/pg/20190529/7801925042630819841105394904.jpg')">
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://pg-media.ksmobile.com/photo/middle/pg/20190529/7801925042630819841105394904.jpg')
+    }
+</style>
+<header class="intro-header">
     <div class="container">
         <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
-                <div class="site-heading">
-                    <h1>Joe&#39;s Notes </h1>
-                    
-		    <span class="subheading">Joe是我</span>
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/tool" title="tool">
+                            tool
+                        </a>
+                        
+                        <a class="tag" href="/tags/tips" title="tips">
+                            tips
+                        </a>
+                        
+                        <a class="tag" href="/tags/linux" title="Linux">
+                            Linux
+                        </a>
+                        
+                        <a class="tag" href="/tags/shell" title="shell">
+                            shell
+                        </a>
+                        
+                    </div>
+                    <h1>Useful Curl Alias</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by 
+                        
+                                Joe&#39;s Notes
+                         
+                        on 
+                        Tuesday, October 22, 2019
+                        
+                        
+                        
+                    </span>
                 </div>
             </div>
         </div>
@@ -166,13 +201,114 @@
 <article>
     <div class="container">
         <div class="row">
+
             
             <div class="
                 col-lg-8 col-lg-offset-2
                 col-md-10 col-md-offset-1
                 post-container">
 
-         	
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#前言">前言</a></li>
+<li><a href="#組合技法">組合技法</a></li>
+<li><a href="#實際使用">實際使用</a></li>
+</ul></li>
+</ul>
+</nav>
+                
+                
+
+<h2 id="前言">前言</h2>
+
+<p>常常會需要去檢查API的狀態，包含response header及response body。所以一個好用的command組合可以讓你輕鬆一點</p>
+
+<h2 id="組合技法">組合技法</h2>
+
+<p>將alias放到  ~/.bashrc 這樣下次啟動後就可以生效了</p>
+<div class="highlight"><pre class="chroma">echo alias c=&#39;curl -s --dump-header /dev/stderr&#39; &gt;&gt; ~/.bashrc
+source ~/.bashrc</pre></div>
+<h2 id="實際使用">實際使用</h2>
+<div class="highlight"><pre class="chroma">c &#39;https://api.ipify.org?format=json&#39;|jq
+
+or 
+
+c &#39;https://api.ipify.org?format=json&#39;|jq .ip</pre></div>
+<p>執行結果</p>
+<div class="highlight"><pre class="chroma">joe@server:~$ c &#39;https://api.ipify.org?format=json&#39;|jq 
+HTTP/1.1 200 OK
+Server: Cowboy
+Connection: keep-alive
+Content-Type: application/json
+Vary: Origin
+Date: Tue, 22 Oct 2019 02:57:35 GMT
+Content-Length: 23
+Via: 1.1 vegur
+
+{
+  &#34;ip&#34;: &#34;115.237.31.60&#34;
+}</pre></div>
+<p>是不是很好用？</p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「您的支持是創作的原動力」</p>
+	
+	<button class="zs show-zs btn btn-bred">贊助支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://clhjoe.github.io/"><img src="/img/favicon.ico" />Joe&#39;s Notes</a></span>
+        
+	        <p class="tip"><i></i><span>您的支持是創作的原動力</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="20">20元</button>
+			<button class="btn btn-blink" data-num="40">40元</button>
+			<button class="btn btn-blink" data-num="80">80元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">Wechat(微信))</span>掃描QR Code贊助我吧！</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/migrate-api-to-go/" data-toggle="tooltip" data-placement="top" title="Migrate API to Go">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
                 
 <div id="disqus-comment"></div>
 
@@ -216,97 +352,97 @@
                         
                         
                         <a href="/tags/architecture" title="architecture">
-                        architecture
+                            architecture
                         </a>
                         
                         
                         
                         <a href="/tags/aws" title="aws">
-                        aws
+                            aws
                         </a>
                         
                         
                         
                         <a href="/tags/cloudfront" title="cloudfront">
-                        cloudfront
+                            cloudfront
                         </a>
                         
                         
                         
                         <a href="/tags/docker" title="docker">
-                        docker
+                            docker
                         </a>
                         
                         
                         
                         <a href="/tags/go" title="go">
-                        go
+                            go
                         </a>
                         
                         
                         
                         <a href="/tags/go-module" title="go-module">
-                        go-module
+                            go-module
                         </a>
                         
                         
                         
                         <a href="/tags/golang" title="golang">
-                        golang
+                            golang
                         </a>
                         
                         
                         
                         <a href="/tags/hugo" title="hugo">
-                        hugo
+                            hugo
                         </a>
                         
                         
                         
                         <a href="/tags/linux" title="linux">
-                        linux
+                            linux
                         </a>
                         
                         
                         
                         <a href="/tags/multi" title="multi">
-                        multi
+                            multi
                         </a>
                         
                         
                         
                         <a href="/tags/nginx" title="nginx">
-                        nginx
+                            nginx
                         </a>
                         
                         
                         
                         <a href="/tags/proxy" title="proxy">
-                        proxy
+                            proxy
                         </a>
                         
                         
                         
                         <a href="/tags/shell" title="shell">
-                        shell
+                            shell
                         </a>
                         
                         
                         
                         <a href="/tags/stage" title="stage">
-                        stage
+                            stage
                         </a>
                         
                         
                         
                         <a href="/tags/tips" title="tips">
-                        tips
+                            tips
                         </a>
                         
                         
                         
                         <a href="/tags/tool" title="tool">
-                        tool
+                            tool
                         </a>
                         
                         
@@ -331,7 +467,7 @@
                 <ul class="list-inline text-center">
                    
                    <li>
-                       <a href='/tags/index.xml' rel="alternate" type="application/rss+xml" title="Joe&#39;s Notes" >
+                       <a href='' rel="alternate" type="application/rss+xml" title="Joe&#39;s Notes" >
                            <span class="fa-stack fa-lg">
                                <i class="fa fa-circle fa-stack-2x"></i>
                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
+  <channel>
+    <title>cloudfront on Joe&#39;s Notes</title>
+    <link>https://clhjoe.github.io/tags/cloudfront/</link>
+    <description>Recent content in cloudfront on Joe&#39;s Notes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-tw</language>
+    <lastBuildDate>Sun, 20 Oct 2019 19:26:31 +0800</lastBuildDate>
+    
+	<atom:link href="https://clhjoe.github.io/tags/cloudfront/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Migrate API to Go</title>
+      <link>https://clhjoe.github.io/post/migrate-api-to-go/</link>
+      <pubDate>Sun, 20 Oct 2019 19:26:31 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/migrate-api-to-go/</guid>
+      <description>前言 大家應該或多或少都有經驗要將某個語言實做的API搬到另一種語言重寫。原因總是有千千百百種，但是有時候當專案很大，沒辦法一次搬完的時候又該怎麼辦呢？分享一下我們的例子。
+原先的API是使用PHP來撰寫，但因為幾個原因所以我們決定把他搬到Golang。
+ 原始PHP版本留在PHP 5.3，是一個效能不好(compare to PHP 7)以及不被維護的版本。要升級得顧慮沒有人維護的framework，所以是個大工程。 因為業務的需要，一個API request有很多可以平行化處理的事情，如果一步步來其實速度慢又浪費資源，改用Golang可以帶來大幅度的效能提昇。 我們原始業務一直是使用Golang，在QPS &amp;gt; 2w的環境上驗證過，所以成熟度完全不是問題。  因此最後決定新的API就以Golang撰寫，有需要動到舊有的API且時間足夠再搬到Golang。這時候就遇到一個問題啦，同時兩套語言寫成的API要怎麼共存的？當時想到透過切分域名或切分request path也就是routing來達成，分成幾個維度來看～
+切分域名 切分域名就如字面上的意思，舊的API用原有的域名，新的API用心的域名。簡單明瞭不囉唆。但同時也有不便之處。
+優缺點分析 優點  新舊API切分乾淨，新的API不會影響舊版的APP。 針對新舊API可以有完全不同的API設定，例如快取規則、HTTPS的SSL版本、及開啟HTTP/2等等  缺點  如果僅僅是想要優化API以Golang改寫，將只有新版的APP用戶會拉取，而一般APP的版本到達率&amp;hellip;慘 萬一同個API以Golang實做了，在未來如果要更改邏輯則必須兩個語言都要同時更改，增加開發及測試的複雜度   切分Routing 透過CDN切分 以Cloudfront為例，透過Cloudfront可以將不同的PATH Route到不同的Origin，甚至我們可以針對不同的PATH設定不同的快取時間、通訊協定、要cache的query parameter或header等等。 
+透過Proxy(Nginx)切分 我們可以在Proxy例如Nginx來設定不同的PATH要使用PHP或者是forward到Go API。
+# /v1/user forward到PHP location /v1/user { if (!-e $request_filename) { rewrite ^/(.*)$ /index.php last; } } # /v1/user/points 則forward到golang location /v1/user/points { proxy_pass https://localhost:19002; } 在Golang裡切分 這邊以Gin為例，我們把所有的request都導到Go API，如果API在golang裡面有實做則直接由GO處理，否則就proxy到原有的PHP API處理</description>
+    </item>
+    
+  </channel>
+</rss>

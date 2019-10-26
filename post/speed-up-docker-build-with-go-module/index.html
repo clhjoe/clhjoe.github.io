@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="" />
-    <meta property="og:title" content="" />
-    <meta property="twitter:title" content="" />
+    <meta name="title" content="Speed Up Docker Build With Go Module" />
+    <meta property="og:title" content="Speed Up Docker Build With Go Module" />
+    <meta property="twitter:title" content="Speed Up Docker Build With Go Module" />
     
 
     
-    <meta name="description" content="備忘錄..">
-    <meta property="og:description" content="備忘錄.." />
-    <meta property="twitter:description" content="備忘錄.." />
+    <meta name="description" content="使用小技巧來避免go 重新拉取module加快編譯速度">
+    <meta property="og:description" content="使用小技巧來避免go 重新拉取module加快編譯速度" />
+    <meta property="twitter:description" content="使用小技巧來避免go 重新拉取module加快編譯速度" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="backend,aws,docker,golang,tech,">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>Tags-Joe 的備忘錄 | Joe&#39;s Blog</title>
+    <title>Speed Up Docker Build With Go Module-Joe 的備忘錄 | Joe&#39;s Blog</title>
 
-    <link rel="canonical" href="/tags/">
+    <link rel="canonical" href="/post/speed-up-docker-build-with-go-module/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -146,14 +146,61 @@
 
 
 
-<header class="intro-header" style="background-image: url('https://pg-media.ksmobile.com/photo/middle/pg/20190529/7801925042630819841105394904.jpg')">
+
+<style type="text/css">
+    header.intro-header {
+        background-image: url('https://pg-media.ksmobile.com/photo/middle/pg/20190529/7801925042630819841105394904.jpg')
+    }
+</style>
+<header class="intro-header">
     <div class="container">
         <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
-                <div class="site-heading">
-                    <h1>Joe&#39;s Notes </h1>
-                    
-		    <span class="subheading">Joe是我</span>
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/tips" title="tips">
+                            tips
+                        </a>
+                        
+                        <a class="tag" href="/tags/docker" title="docker">
+                            docker
+                        </a>
+                        
+                        <a class="tag" href="/tags/multi" title="multi">
+                            multi
+                        </a>
+                        
+                        <a class="tag" href="/tags/stage" title="stage">
+                            stage
+                        </a>
+                        
+                        <a class="tag" href="/tags/go" title="go">
+                            go
+                        </a>
+                        
+                        <a class="tag" href="/tags/golang" title="golang">
+                            golang
+                        </a>
+                        
+                        <a class="tag" href="/tags/go-module" title="go module">
+                            go module
+                        </a>
+                        
+                    </div>
+                    <h1>Speed Up Docker Build With Go Module</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by 
+                        
+                                Joe&#39;s Notes
+                         
+                        on 
+                        Sunday, October 13, 2019
+                        
+                        
+                        
+                    </span>
                 </div>
             </div>
         </div>
@@ -166,13 +213,108 @@
 <article>
     <div class="container">
         <div class="row">
+
             
             <div class="
                 col-lg-8 col-lg-offset-2
                 col-md-10 col-md-offset-1
                 post-container">
 
-         	
+                
+                <header>
+                    <h2>TOC</h2>
+                </header>
+                
+                
+                <p><a href="https://clhjoe.github.io/posts/multi-stage-docker-build-with-go-module/">上一篇</a> 說明了如何降低Docker 編譯Go程式產生的image大小，但同時也提到了因為Go 每次都會去抓相依的module導致編譯速度就是慢！
+<img src="https://pg-media.ksmobile.com/production/material/file/all_90/1571203055.png" alt="go mod download" />
+有什麼方法可以加速呢？來看看看優化版本</p>
+
+<p><strong>optimized.Dockerfile</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="c">#first stage - builder</span><span class="err">
+</span><span class="err"></span><span class="k">FROM</span><span class="s"> golang:1.13.1-stretch as builder</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /api</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c">#Step 1. 複製go.mod及go.sum</span><span class="err">
+</span><span class="err"></span>COPY go.mod go.sum ./<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c">#Step 2. 下載所有的dependencies, 只要go.mod和go.sum不變就不需要重新下載相依</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> go mod download<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c"># Step 3. 複製source code並編譯</span><span class="err">
+</span><span class="err"></span>COPY . .<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="k">ENV</span><span class="s"> GO111MODULE=on</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> <span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span> <span class="nv">GOOS</span><span class="o">=</span>linux go build -o api main.go<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c">#second stage</span><span class="err">
+</span><span class="err"></span><span class="k">FROM</span><span class="s"> alpine:latest</span><span class="err">
+</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /root/</span><span class="err">
+</span><span class="err"></span>COPY --from<span class="o">=</span>builder /api .<span class="err">
+</span><span class="err"></span><span class="k">CMD</span><span class="s"> [&#34;./api&#34;]</span></code></pre></div>
+<p>透過Step 1,2 來節省下載相依的時間，試試看吧～</p>
+
+<p>如同前一篇提及，alpine是精簡的fs, 缺少許多程式需要的library例如tzdata等等，如何寫出完整的Dockerfile呢？<a href="https://clhjoe.github.io/posts/complete-example-of-docker-build-with-go-module/">請看此</a></p>
+
+
+                
+                
+<div class="entry-shang text-center">
+    
+	    <p>「您的支持是創作的原動力」</p>
+	
+	<button class="zs show-zs btn btn-bred">贊助支持</button>
+</div>
+<div class="zs-modal-bg"></div>
+<div class="zs-modal-box">
+	<div class="zs-modal-head">
+		<button type="button" class="close">×</button>
+		<span class="author"><a href="https://clhjoe.github.io/"><img src="/img/favicon.ico" />Joe&#39;s Notes</a></span>
+        
+	        <p class="tip"><i></i><span>您的支持是創作的原動力</span></p>
+		
+ 
+	</div>
+	<div class="zs-modal-body">
+		<div class="zs-modal-btns">
+			<button class="btn btn-blink" data-num="10">10元</button>
+			<button class="btn btn-blink" data-num="20">20元</button>
+			<button class="btn btn-blink" data-num="40">40元</button>
+			<button class="btn btn-blink" data-num="80">80元</button>
+			<button class="btn btn-blink" data-num="100">100元</button>
+			<button class="btn btn-blink" data-num="1">任意金额</button>
+		</div>
+		<div class="zs-modal-pay">
+			<button class="btn btn-bred" id="pay-text">2元</button>
+			<p>使用<span id="pay-type">Wechat(微信))</span>掃描QR Code贊助我吧！</p>
+			<img src="/img/reward/wechat-2.png"  id="pay-image"/>
+		</div>
+	</div>
+	<div class="zs-modal-footer">
+		<label><input type="radio" name="zs-type" value="wechat" class="zs-type" checked="checked"><span ><span class="zs-wechat"><img src="/img/reward/wechat-btn.png"/></span></label>
+	</div>
+</div>
+<script type="text/javascript" src="/js/reward.js"></script>
+
+                
+
+                <hr>
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/post/multi-stage-docker-build-with-go-module/" data-toggle="tooltip" data-placement="top" title="Multi Stage Docker Build With Go Module">&larr;
+                            Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/post/complete-example-of-docker-build-with-go-module/" data-toggle="tooltip" data-placement="top" title="Complete Example of Docker Build With Go Module">Next
+                            Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
                 
 <div id="disqus-comment"></div>
 
@@ -216,97 +358,97 @@
                         
                         
                         <a href="/tags/architecture" title="architecture">
-                        architecture
+                            architecture
                         </a>
                         
                         
                         
                         <a href="/tags/aws" title="aws">
-                        aws
+                            aws
                         </a>
                         
                         
                         
                         <a href="/tags/cloudfront" title="cloudfront">
-                        cloudfront
+                            cloudfront
                         </a>
                         
                         
                         
                         <a href="/tags/docker" title="docker">
-                        docker
+                            docker
                         </a>
                         
                         
                         
                         <a href="/tags/go" title="go">
-                        go
+                            go
                         </a>
                         
                         
                         
                         <a href="/tags/go-module" title="go-module">
-                        go-module
+                            go-module
                         </a>
                         
                         
                         
                         <a href="/tags/golang" title="golang">
-                        golang
+                            golang
                         </a>
                         
                         
                         
                         <a href="/tags/hugo" title="hugo">
-                        hugo
+                            hugo
                         </a>
                         
                         
                         
                         <a href="/tags/linux" title="linux">
-                        linux
+                            linux
                         </a>
                         
                         
                         
                         <a href="/tags/multi" title="multi">
-                        multi
+                            multi
                         </a>
                         
                         
                         
                         <a href="/tags/nginx" title="nginx">
-                        nginx
+                            nginx
                         </a>
                         
                         
                         
                         <a href="/tags/proxy" title="proxy">
-                        proxy
+                            proxy
                         </a>
                         
                         
                         
                         <a href="/tags/shell" title="shell">
-                        shell
+                            shell
                         </a>
                         
                         
                         
                         <a href="/tags/stage" title="stage">
-                        stage
+                            stage
                         </a>
                         
                         
                         
                         <a href="/tags/tips" title="tips">
-                        tips
+                            tips
                         </a>
                         
                         
                         
                         <a href="/tags/tool" title="tool">
-                        tool
+                            tool
                         </a>
                         
                         
@@ -331,7 +473,7 @@
                 <ul class="list-inline text-center">
                    
                    <li>
-                       <a href='/tags/index.xml' rel="alternate" type="application/rss+xml" title="Joe&#39;s Notes" >
+                       <a href='' rel="alternate" type="application/rss+xml" title="Joe&#39;s Notes" >
                            <span class="fa-stack fa-lg">
                                <i class="fa fa-circle fa-stack-2x"></i>
                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>

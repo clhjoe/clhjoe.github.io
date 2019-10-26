@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
+  <channel>
+    <title>tool on Joe&#39;s Notes</title>
+    <link>https://clhjoe.github.io/tags/tool/</link>
+    <description>Recent content in tool on Joe&#39;s Notes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-tw</language>
+    <lastBuildDate>Tue, 22 Oct 2019 10:53:54 +0800</lastBuildDate>
+    
+	<atom:link href="https://clhjoe.github.io/tags/tool/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Useful Curl Alias</title>
+      <link>https://clhjoe.github.io/post/useful-curl-alias/</link>
+      <pubDate>Tue, 22 Oct 2019 10:53:54 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/useful-curl-alias/</guid>
+      <description>前言 常常會需要去檢查API的狀態，包含response header及response body。所以一個好用的command組合可以讓你輕鬆一點
+組合技法 將alias放到 ~/.bashrc 這樣下次啟動後就可以生效了
+echo alias c=&amp;#39;curl -s --dump-header /dev/stderr&amp;#39; &amp;gt;&amp;gt; ~/.bashrc source ~/.bashrc 實際使用 c &amp;#39;https://api.ipify.org?format=json&amp;#39;|jq or c &amp;#39;https://api.ipify.org?format=json&amp;#39;|jq .ip 執行結果
+joe@server:~$ c &amp;#39;https://api.ipify.org?format=json&amp;#39;|jq HTTP/1.1 200 OK Server: Cowboy Connection: keep-alive Content-Type: application/json Vary: Origin Date: Tue, 22 Oct 2019 02:57:35 GMT Content-Length: 23 Via: 1.1 vegur { &amp;#34;ip&amp;#34;: &amp;#34;115.237.31.60&amp;#34; } 是不是很好用？</description>
+    </item>
+    
+  </channel>
+</rss>

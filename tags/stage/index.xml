@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
+  <channel>
+    <title>stage on Joe&#39;s Notes</title>
+    <link>https://clhjoe.github.io/tags/stage/</link>
+    <description>Recent content in stage on Joe&#39;s Notes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-tw</language>
+    <lastBuildDate>Sun, 13 Oct 2019 21:23:54 +0800</lastBuildDate>
+    
+	<atom:link href="https://clhjoe.github.io/tags/stage/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Speed Up Docker Build With Go Module</title>
+      <link>https://clhjoe.github.io/post/speed-up-docker-build-with-go-module/</link>
+      <pubDate>Sun, 13 Oct 2019 21:23:54 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/speed-up-docker-build-with-go-module/</guid>
+      <description>上一篇 說明了如何降低Docker 編譯Go程式產生的image大小，但同時也提到了因為Go 每次都會去抓相依的module導致編譯速度就是慢！ 有什麼方法可以加速呢？來看看看優化版本
+optimized.Dockerfile
+#first stage - builderFROMgolang:1.13.1-stretch as builderWORKDIR/api#Step 1. 複製go.mod及go.sumCOPY go.mod go.sum ./#Step 2. 下載所有的dependencies, 只要go.mod和go.sum不變就不需要重新下載相依RUN go mod download# Step 3. 複製source code並編譯COPY . .ENVGO111MODULE=onRUN CGO_ENABLED=0 GOOS=linux go build -o api main.go#second stageFROMalpine:latestWORKDIR/root/COPY --from=builder /api .CMD[&amp;#34;./api&amp;#34;] 透過Step 1,2 來節省下載相依的時間，試試看吧～
+如同前一篇提及，alpine是精簡的fs, 缺少許多程式需要的library例如tzdata等等，如何寫出完整的Dockerfile呢？請看此</description>
+    </item>
+    
+    <item>
+      <title>Multi Stage Docker Build With Go Module</title>
+      <link>https://clhjoe.github.io/post/multi-stage-docker-build-with-go-module/</link>
+      <pubDate>Sun, 13 Oct 2019 20:53:48 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/multi-stage-docker-build-with-go-module/</guid>
+      <description>為什麼要使用Multi-stage來編譯Golang？ 假設我們有一個簡單的Golang程式如下
+main.go
+package main import &amp;#34;github.com/gin-gonic/gin&amp;#34; func main() { r := gin.Default() r.GET(&amp;#34;/ping&amp;#34;, func(c *gin.Context) { c.JSON(200, gin.H{ &amp;#34;message&amp;#34;: &amp;#34;pong&amp;#34;, }) }) r.Run() // listen and serve on 0.0.0.0:8080 } 然後我們爲了這支程式寫了個Dockerfile
+Dockerfile
+FROMgolang:1.13.1-stretch COPY . /api WORKDIR/apiENVGO111MODULE=onRUN CGO_ENABLED=0 GOOS=linux go build -o api main.goCMD[&amp;#34;./api&amp;#34;] 編譯他吧！
+docker build . -t api 編譯完我們來看一下Image有多大？
+docker images #REPOSITORY TAG IMAGE ID CREATED SIZE #api latest 1f3921830d5a 39 seconds ago 842MB 有沒有搞錯？要842MB? 怎麼不去搶？</description>
+    </item>
+    
+  </channel>
+</rss>
