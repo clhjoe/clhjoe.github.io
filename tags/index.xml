@@ -6,7 +6,7 @@
     <description>Recent content in Tags on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Sat, 26 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 29 Oct 2019 11:54:32 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,16 +14,25 @@
     <item>
       <title>aws</title>
       <link>https://clhjoe.github.io/tags/aws/</link>
-      <pubDate>Sat, 26 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 29 Oct 2019 11:54:32 +0800</pubDate>
       
       <guid>https://clhjoe.github.io/tags/aws/</guid>
       <description></description>
     </item>
     
     <item>
+      <title>dns</title>
+      <link>https://clhjoe.github.io/tags/dns/</link>
+      <pubDate>Tue, 29 Oct 2019 11:54:32 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/tags/dns/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>go</title>
       <link>https://clhjoe.github.io/tags/go/</link>
-      <pubDate>Sat, 26 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 29 Oct 2019 11:54:32 +0800</pubDate>
       
       <guid>https://clhjoe.github.io/tags/go/</guid>
       <description></description>
@@ -32,9 +41,18 @@
     <item>
       <title>golang</title>
       <link>https://clhjoe.github.io/tags/golang/</link>
-      <pubDate>Sat, 26 Oct 2019 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 29 Oct 2019 11:54:32 +0800</pubDate>
       
       <guid>https://clhjoe.github.io/tags/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>linux</title>
+      <link>https://clhjoe.github.io/tags/linux/</link>
+      <pubDate>Tue, 29 Oct 2019 11:54:32 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/tags/linux/</guid>
       <description></description>
     </item>
     
@@ -80,15 +98,6 @@
       <pubDate>Sat, 26 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://clhjoe.github.io/tags/timeout/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>linux</title>
-      <link>https://clhjoe.github.io/tags/linux/</link>
-      <pubDate>Tue, 22 Oct 2019 10:53:54 +0800</pubDate>
-      
-      <guid>https://clhjoe.github.io/tags/linux/</guid>
       <description></description>
     </item>
     

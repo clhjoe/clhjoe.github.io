@@ -6,10 +6,25 @@
     <description>Recent content in aws on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Sat, 26 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 29 Oct 2019 11:54:32 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/tags/aws/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Linux Dns Debug</title>
+      <link>https://clhjoe.github.io/post/linux-dns-debug/</link>
+      <pubDate>Tue, 29 Oct 2019 11:54:32 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/linux-dns-debug/</guid>
+      <description>我到底用了哪台DNS server? 在Linux上，不管是使用glibc dns resolver或是golang自己實做的dns resolver, 他們都會去查看系統下的 /etc/hosts 及 /etc/resolv.conf 。/etc/hosts沒什麼好說的，下面舉個/etc/resolv.conf的例子
+nameserver 127.0.0.53 nameserver 8.8.8.8 這邊的結果代表他會先去查詢 127.0.0.53 如果查不到再去查 8.8.8.8，如果也失敗了再重頭來直到嘗試三次都查不到才宣告放棄。想想，這時候如果是在第三輪才藉由8.8.8.8查到IP，那都浪費多少生命了。
+AWS上的DNS 查詢 AWS DNS有哪些？ 在AWS上，可以使用的DNS server有 169.254.169.254 跟 VPC IPv4 network range加2(假設你的IP range是 10.2.0.0/16 ，你就可以用10.2.0.2當DNS server).差別在前者在某些OS上是不能使用的(例如 Windows Server 2008) 但是在Linux上是沒有問題的。
+AWS DNS限制 AWS DNS有每秒不能超過1024次query的限制，假設超過了就會把你throttle。建議的作法是安裝 dnsmasq 他會cache住查詢結果，這樣就不用一直去問啦～預設cache時間是DNS設置的ttl時間，要注意的是，自己延長TTL是有風險的。假設你使用了RDS的服務，他是透過DNS來切換Master/Slave的，當你延長了TTL也就代表當今天Master掛了，你需要花更久的時間才能連到新的Master。
+DNS除錯方法 查詢域名是否可以解析 常見的方式是使用dig來看，例如
+dig www.google.com 結果會類似
+; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG 9.11.3-1ubuntu1.9-Ubuntu &amp;lt;&amp;lt;&amp;gt;&amp;gt; www.google.com ;; global options: +cmd ;; Got answer: ;; -&amp;gt;&amp;gt;HEADER&amp;lt;&amp;lt;- opcode: QUERY, status: NOERROR, id: 43990 ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1 ;; OPT PSEUDOSECTION: ; EDNS: version: 0, flags:; udp: 65494 ;; QUESTION SECTION: ;www.</description>
+    </item>
     
     <item>
       <title>Timeout原因整理-以Golang為例</title>
