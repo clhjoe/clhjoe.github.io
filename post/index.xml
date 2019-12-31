@@ -6,10 +6,25 @@
     <description>Recent content in Posts on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Tue, 31 Dec 2019 22:44:35 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 31 Dec 2019 22:59:50 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Redis Fundamental</title>
+      <link>https://clhjoe.github.io/post/redis-fundamental/</link>
+      <pubDate>Tue, 31 Dec 2019 22:59:50 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/redis-fundamental/</guid>
+      <description>Redis 基礎 Redis資料型態 Redis提供了豐富的資料型態操作
+ Binary-safe strings:簡單來說你可以存放字串或是binary。 Lists: 按照插入順序排序的字串集合。基本上就是一個linked lists. Sets: 一群唯一(unique)的且未經排序的字串集合。 Sorted sets: 與Set集合很像差別在sorted set每一個string都有一個float的score值，Redis會依照Score值來做排序。String element仍然是unique但score可以重複。 Hashes: 即為一個map的結構，其key/value都是string。Redis的hashs與 Ruby 或 Python hashes 相似。 Bit arrays (or simply bitmaps): 簡單的說就是一個連續的二進位數字，每一個位置(offset)在bitmap上可以執行AND/OR/XOR等等操作。 HyperLogLogs: 簡單的說就是用來估計一個隨機資料結構的集合的基數。更簡單一點譬如說計算每個ip每天的access次數。  但是，人生總有個但是，也因為資料是存放在記憶體中，因此如果資料量擴展到一定的程度將對成本有劇烈的影響。所以如何妥善的使用Redis是一個很大的課題。
+Redis 基礎用法 1. STRING String 是memcached 唯一支援的資料結構。簡單的key/value用法是最多初學者第一個使用的型態。
+常見的使用情境有:
+ 限制使用者每分鐘的使用次數(限流) 暫存首頁response結果  快取資料 譬如說，當一個web page的首頁是靜態的或是不需要頻繁更新的時候，我們可以將結果(HTML or Json)存入cache。這樣一來可以減少許多DB的消耗及計算。
+或是我們可以將user的token存入cache中，這樣我們可以很快的比較使用者的token是否合法。
+&amp;lt;?php //SET key value [EX seconds] [PX milliseconds] [NX|XX] ; Time complexity: O(1) //GET key ; Time complexity: O(1) $redis-&amp;gt;set(&amp;#39;user_token:111&amp;#39;, &amp;#39;WFWEWEFEWF&amp;#39;,86400); $token=$redis-&amp;gt;get(&amp;#39;get user_token:111&amp;#39;); echo $token; // &amp;#34;WFWEWEFEWF&amp;#34;  Page View計算 例如我們可以是用INCR來累加page view.</description>
+    </item>
     
     <item>
       <title>Video Streaming Architecture</title>
