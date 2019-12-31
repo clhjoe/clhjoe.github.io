@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="How to Use Hugo" />
-    <meta property="og:title" content="How to Use Hugo" />
-    <meta property="twitter:title" content="How to Use Hugo" />
+    <meta name="title" content="PHP Process Tuning" />
+    <meta property="og:title" content="PHP Process Tuning" />
+    <meta property="twitter:title" content="PHP Process Tuning" />
     
 
     
-    <meta name="description" content="Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了">
-    <meta property="og:description" content="Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了" />
-    <meta property="twitter:description" content="Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了" />
+    <meta name="description" content="PHP是常見的後端程式語言，在業務初期使用預設的配置通常不會有太大的問題。但是一旦業務開始成長後，沒有經過調校的配置不僅讓你的後端效能不彰更可能造成API access的錯誤。一起來了解怎麼調校你的PHP吧！">
+    <meta property="og:description" content="PHP是常見的後端程式語言，在業務初期使用預設的配置通常不會有太大的問題。但是一旦業務開始成長後，沒有經過調校的配置不僅讓你的後端效能不彰更可能造成API access的錯誤。一起來了解怎麼調校你的PHP吧！" />
+    <meta property="twitter:description" content="PHP是常見的後端程式語言，在業務初期使用預設的配置通常不會有太大的問題。但是一旦業務開始成長後，沒有經過調校的配置不僅讓你的後端效能不彰更可能造成API access的錯誤。一起來了解怎麼調校你的PHP吧！" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="backend,aws,docker,golang,tech,">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>How to Use Hugo-Joe 的備忘錄 | Joe&#39;s Blog</title>
+    <title>PHP Process Tuning-Joe 的備忘錄 | Joe&#39;s Blog</title>
 
-    <link rel="canonical" href="/post/how-to-use-hugo/">
+    <link rel="canonical" href="/post/php-process-tuning/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -163,12 +163,20 @@
                             tips
                         </a>
                         
-                        <a class="tag" href="/tags/hugo" title="hugo">
-                            hugo
+                        <a class="tag" href="/tags/nginx" title="nginx">
+                            nginx
+                        </a>
+                        
+                        <a class="tag" href="/tags/php" title="php">
+                            php
+                        </a>
+                        
+                        <a class="tag" href="/tags/php-fpm" title="PHP-FPM">
+                            PHP-FPM
                         </a>
                         
                     </div>
-                    <h1>How to Use Hugo</h1>
+                    <h1>PHP Process Tuning</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by 
@@ -176,7 +184,7 @@
                                 Joe&#39;s Notes
                          
                         on 
-                        Sunday, October 13, 2019
+                        Tuesday, December 31, 2019
                         
                         
                         
@@ -206,78 +214,90 @@
                 </header>
                 <nav id="TableOfContents">
 <ul>
+<li><a href="#nginx-and-php-fpm">Nginx and PHP-FPM</a></li>
+<li><a href="#php-process-manager-pm">PHP Process Manager(PM)</a></li>
+<li><a href="#php-process-manager-pm-dynamic模式配置優化">PHP Process Manager(PM) Dynamic模式配置優化</a>
+<ul>
 <li>
 <ul>
-<li><a href="#甚麼是hugo">甚麼是Hugo?</a></li>
-<li><a href="#安裝hugo">安裝Hugo</a></li>
-<li><a href="#建立新的網站">建立新的網站</a></li>
-<li><a href="#使用theme">使用Theme</a></li>
-<li><a href="#新增一篇內文">新增一篇內文</a></li>
-<li><a href="#預覽一下網站吧">預覽一下網站吧</a></li>
-<li><a href="#放置到github">放置到github</a></li>
+<li><a href="#pm-start-servers-初始-process數">pm.start_servers(初始 process數)</a></li>
+<li><a href="#pm-max-children-最大process-數">pm.max_children(最大process 數)</a></li>
+<li><a href="#pm-min-spare-servers-最小閒置process數">pm.min_spare_servers( 最小閒置process數)</a></li>
+<li><a href="#pm-max-spare-servers-最大閒置process數">pm.max_spare_servers( 最大閒置process數)</a></li>
+<li><a href="#pm-max-requests-單一process可以處理多少process">pm.max_requests(單一process可以處理多少process)</a></li>
 </ul></li>
+</ul></li>
+<li><a href="#常見錯誤處理">常見錯誤處理</a></li>
 </ul>
 </nav>
                 
                 
 
-<h2 id="甚麼是hugo">甚麼是Hugo?</h2>
+<h1 id="nginx-and-php-fpm">Nginx and PHP-FPM</h1>
 
-<p>Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了。</p>
+<p>Nginx是一個輕量的網頁伺服器，他可以高效能的處理靜態檔案。但是如果是動態頁面就必須交由後端例如GO、Python 或是PHP來進行了。現行的Nginx與PHP是通過fast-cgi(Fast Common Gateway Interface) 來進行，不同於CGI為每個Request都建立一個Process造成效能低落，FastCGI透過一個統一管理的Process管理背後的Worker避免過度頻繁建立、關閉Process。
+<img src="https://pg-media.ksmobile.com/production/material/file/all_108/1576647093.jpg"</img></p>
 
-<h2 id="安裝hugo">安裝Hugo</h2>
+<h1 id="php-process-manager-pm">PHP Process Manager(PM)</h1>
 
-<p><strong>For Mac</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">brew install hugo</code></pre></div>
-<p><strong>For Linux</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">snap install hugo --channel<span class="o">=</span>extended
+<p>PHP process manager有三種模式，分別為
+1.  <strong>static</strong>：固定process數量（數量為 pm.max_children）。
+2. <strong>dynamic</strong>：動態process數量（根據 pm.max_children、pm.start_servers、pm.min_spare_servers、pm.max_spare_servers 動態調整）。
+3. <strong>ondemand</strong>：動態process數量（根據 pm.max_children、pm.process_idle_timeout 動態調整）。</p>
 
-or 
+<p><strong>static</strong> 就是固定process數量。如果網站流量單純，沒有明顯流量高峰或低峰就可以選用<strong>static</strong> 。</p>
 
-sudo apt-get install hugo</code></pre></div>
-<h2 id="建立新的網站">建立新的網站</h2>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1">#將new-site 替代成你要的網站名稱</span>
-hugo new site new-site</code></pre></div>
-<h2 id="使用theme">使用Theme</h2>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1">#將new-site 替代成你的網站名稱,這裡以anake為例。</span>
-<span class="nb">cd</span> new-site
-git init
-git submodule add https://github.com/budparr/gohugo-theme-ananke.git themes/ananke
-<span class="nb">echo</span> <span class="s1">&#39;theme = &#34;ananke&#34;&#39;</span> &gt;&gt; config.toml</code></pre></div>
-<p>更多的Theme可以到 <a href="https://themes.gohugo.io/">https://themes.gohugo.io/</a> 參考</p>
+<p><strong>ondemand</strong>會根據實際流量來決定process數，但是因為建立process是需要時間的，所以<strong>效能較差</strong>。但是當流量低的時候，他只會保留所需的process數，所以<strong>節省記憶體</strong>。通常用在比較不重要的服務上。</p>
 
-<h2 id="新增一篇內文">新增一篇內文</h2>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">hugo new posts/my-first-post.md</code></pre></div>
-<p>執行後會在content/posts/ 產生這份md檔，直接編輯內容就好了。如果要刪除這篇文章，也可以直接刪除檔案即可。</p>
+<p><strong>dynamic</strong> 跟 <strong>ondemand</strong>很容易稿混，<strong>dynamic</strong>可以設定規則，隨時<strong>保留足夠的預備process(min_spare_servers)</strong> 處理突波，而在結束後也可以<strong>確保記憶體不會被過度使用(max_spare_servers)</strong> ， 因此較適合在忙碌的服務上。</p>
 
-<h2 id="預覽一下網站吧">預覽一下網站吧</h2>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">hugo server -D</code></pre></div>
-<p>執行後打開瀏覽器，輸入 <a href="https://localhost:1313/">https://localhost:1313/</a> 就可以預覽你的網站啦～</p>
+<p>接下來我們著重在<strong>dynamic</strong> 的配置優化。</p>
 
-<h2 id="放置到github">放置到github</h2>
+<h1 id="php-process-manager-pm-dynamic模式配置優化">PHP Process Manager(PM) Dynamic模式配置優化</h1>
 
-<p>這邊比較tricky。假設你的github帳號是handsomeboy, 如果要把文章放到handsomeboy.github.io，你必須建立<strong>handsomeboy.github.io</strong> 這個repo然後把public這個資料夾(而非整個hugo網站資料夾)推到這個repo。那hugo資料夾的git要怎麼辦呢？你可以再建個repo放整個hugo資料夾。因此更新一個文章，你必須push到兩個repo～</p>
+<h3 id="pm-start-servers-初始-process數">pm.start_servers(初始 process數)</h3>
+
+<p>決定初始process重要的因數就是服務實際的流量。假設服務需要10個processes, 我們一開始只給1，那系統啟動後就要一直fork process到滿足需求，期間就會造成效能瓶頸。所以比較好的方式是啟動的時候就滿足流量最大的需求個數。
+預設值是 min_spare_servers + (max_spare_servers - min_spare_servers) / 2</p>
+
+<h3 id="pm-max-children-最大process-數">pm.max_children(最大process 數)</h3>
+
+<p>pm.max_children限制了系統最多可以啟動多少process, 決定process的重要因素就是<strong>你的記憶體有多大？</strong>  每一個process都需要消耗記憶體，因此要計算你的機器能承受多少process的記憶體使用量。</p>
+
+<p>因此簡單的公式就是</p>
+
+<p><strong>max_children</strong> = (<strong>system_memory</strong> - <strong>memory_used_by_other_services</strong> - <strong>buffer</strong> ) / <strong>memory_used_per_process</strong></p>
+
+<p><strong>計算記憶體</strong>
+一個PHP-FPM 使用了多少記憶體？</p>
+<div class="highlight"><pre class="chroma">ps --no-headers -o &#34;rss,cmd&#34; -C php-fpm | awk &#39;{ sum+=$1 } END { printf (&#34;%d%s\n&#34;, sum/NR/1024,&#34;Mb&#34;) }&#39;
+
+#50Mb</pre></div>
+<p>所以假設我們系統有 8G的記憶體，然後保留1G的記憶體給系統，因此我們可以得到
+<strong>max_children</strong>= ( 8192 -1024 ) / 50  = 143</p>
+
+<h3 id="pm-min-spare-servers-最小閒置process數">pm.min_spare_servers( 最小閒置process數)</h3>
+
+<p>這個參數的意思是 <strong>最少保留多少的閒置process</strong> 而不是<strong>閒置的時候保留多少process</strong> 。這個值得用意是當你的request有暴衝的時候可以忍受多大的突波。簡單來說，當min_spare_servers=10, 現形的request需要5個process, 這時候PHP就會啟動 15個process。 因此你的系統可以承受10個process可以處理的量。</p>
+
+<h3 id="pm-max-spare-servers-最大閒置process數">pm.max_spare_servers( 最大閒置process數)</h3>
+
+<p>當突波結束後要保留多少閒置的process呢？保留越多的process就會用到越多的記憶體。因此這邊可以隨著業務的進行然後觀察調整(重點就是不要把機器的記憶體弄爆了)。</p>
+
+<h3 id="pm-max-requests-單一process可以處理多少process">pm.max_requests(單一process可以處理多少process)</h3>
+
+<p>max_requests的行為是當process累計處理的request數到達這項設定時就關掉這個process。為什麼會有這個設定出現呢？原因是PHP先天有memory leak的問題，所以往往會發現process跑越久，所佔用的記憶體就越多。因此我們可以實際觀察memory的使用曲線，觀察PHP在跑多久後會失去控制？進而設定max_requests。
+<img src="https://pg-media.ksmobile.com/production/material/file/all_106/1576640042.png"/</img></p>
+
+<h1 id="常見錯誤處理">常見錯誤處理</h1>
 
 <ol>
-<li>建立 <strong>handsomeboy.github.io</strong>(handsomeboy記得換成妳自己的帳號名稱) 及 hugo-web兩個repo。</li>
+<li><p>seems busy (you may need to increase pm.start_servers, or pm.min/max_spare_servers), spawning 32 children, there are 25 idle, and 107 total children
+如同字面上的意思，現行的可用process太少了，建議調高start_servers, min/max_spare_servers數。因此我們可以根據上述的原則去調整。</p></li>
 
-<li><p>將public資料夾推到 <strong>handsomeboy.github.io</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">hugo   <span class="c1">#將md檔轉成靜態資料</span>
-<span class="nb">cd</span> public
-git init
-git remote add origin git@github.com:handsomeboy/handsomeboy.github.io.git
-git add .
-git commit 
-git push -u origin master
-   
-<span class="c1">#push完後打開瀏覽器輸入 https://handsomeboy.github.io 應該就要可以看到你的文章啦～(如果沒看到可以檢查一下.md檔，記得把開頭的drafte改成false)</span> </code></pre></div></li>
-
-<li><p>將hugo送進git</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="nb">cd</span> ..
-git remote add origin git@github.com:handsomeboy/hugo-web.git
-git add .
-git commit 
-git push -u origin master</code></pre></div></li>
+<li><p>PHP 502 Error
+5xx通常是伺服器的錯誤，當你的process不足的時候有機會5xx, 系統的記憶體不足也有可能造成5xx。而以我們自身的案例，調整max_requests也可以處理5xx的產生。
+<img src="https://pg-media.ksmobile.com/production/material/file/all_107/1576640102.png"/</img></p></li>
 </ol>
 
 
@@ -325,11 +345,11 @@ git push -u origin master</code></pre></div></li>
                 <hr>
                 <ul class="pager">
                     
-                    
-                    <li class="next">
-                        <a href="/post/multi-stage-docker-build-with-go-module/" data-toggle="tooltip" data-placement="top" title="Multi Stage Docker Build With Go Module">Next
-                            Post &rarr;</a>
+                    <li class="previous">
+                        <a href="/post/linux-dns-debug/" data-toggle="tooltip" data-placement="top" title="Linux DNS Debug">&larr;
+                            Previous Post</a>
                     </li>
+                    
                     
                 </ul>
 

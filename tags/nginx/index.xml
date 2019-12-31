@@ -6,10 +6,27 @@
     <description>Recent content in nginx on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Sun, 20 Oct 2019 19:26:31 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 31 Dec 2019 22:24:10 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/tags/nginx/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>PHP Process Tuning</title>
+      <link>https://clhjoe.github.io/post/php-process-tuning/</link>
+      <pubDate>Tue, 31 Dec 2019 22:24:10 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/php-process-tuning/</guid>
+      <description>Nginx and PHP-FPM Nginx是一個輕量的網頁伺服器，他可以高效能的處理靜態檔案。但是如果是動態頁面就必須交由後端例如GO、Python 或是PHP來進行了。現行的Nginx與PHP是通過fast-cgi(Fast Common Gateway Interface) 來進行，不同於CGI為每個Request都建立一個Process造成效能低落，FastCGI透過一個統一管理的Process管理背後的Worker避免過度頻繁建立、關閉Process。 PHP Process Manager(PM) PHP process manager有三種模式，分別為 1. static：固定process數量（數量為 pm.max_children）。 2. dynamic：動態process數量（根據 pm.max_children、pm.start_servers、pm.min_spare_servers、pm.max_spare_servers 動態調整）。 3. ondemand：動態process數量（根據 pm.max_children、pm.process_idle_timeout 動態調整）。
+static 就是固定process數量。如果網站流量單純，沒有明顯流量高峰或低峰就可以選用static 。
+ondemand會根據實際流量來決定process數，但是因為建立process是需要時間的，所以效能較差。但是當流量低的時候，他只會保留所需的process數，所以節省記憶體。通常用在比較不重要的服務上。
+dynamic 跟 ondemand很容易稿混，dynamic可以設定規則，隨時保留足夠的預備process(min_spare_servers) 處理突波，而在結束後也可以確保記憶體不會被過度使用(max_spare_servers) ， 因此較適合在忙碌的服務上。
+接下來我們著重在dynamic 的配置優化。
+PHP Process Manager(PM) Dynamic模式配置優化 pm.start_servers(初始 process數) 決定初始process重要的因數就是服務實際的流量。假設服務需要10個processes, 我們一開始只給1，那系統啟動後就要一直fork process到滿足需求，期間就會造成效能瓶頸。所以比較好的方式是啟動的時候就滿足流量最大的需求個數。 預設值是 min_spare_servers + (max_spare_servers - min_spare_servers) / 2
+pm.max_children(最大process 數) pm.max_children限制了系統最多可以啟動多少process, 決定process的重要因素就是你的記憶體有多大？ 每一個process都需要消耗記憶體，因此要計算你的機器能承受多少process的記憶體使用量。
+因此簡單的公式就是
+max_children = (system_memory - memory_used_by_other_services - buffer ) / memory_used_per_process</description>
+    </item>
     
     <item>
       <title>Migrate API to Go</title>

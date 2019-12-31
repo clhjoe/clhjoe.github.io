@@ -3,6 +3,46 @@
   xmlns:xhtml="https://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://clhjoe.github.io/</loc>
+    <lastmod>2019-12-31T22:24:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/nginx/</loc>
+    <lastmod>2019-12-31T22:24:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/php/</loc>
+    <lastmod>2019-12-31T22:24:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/post/php-process-tuning/</loc>
+    <lastmod>2019-12-31T22:24:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/php-fpm/</loc>
+    <lastmod>2019-12-31T22:24:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/post/</loc>
+    <lastmod>2019-12-31T22:24:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/</loc>
+    <lastmod>2019-12-31T22:24:10+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/tips/</loc>
+    <lastmod>2019-12-31T22:24:10+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://clhjoe.github.io/tags/aws/</loc>
     <lastmod>2019-10-29T11:54:32+08:00</lastmod>
   </url>
@@ -23,27 +63,12 @@
   </url>
   
   <url>
-    <loc>https://clhjoe.github.io/</loc>
-    <lastmod>2019-10-29T11:54:32+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://clhjoe.github.io/tags/linux/</loc>
     <lastmod>2019-10-29T11:54:32+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://clhjoe.github.io/post/linux-dns-debug/</loc>
-    <lastmod>2019-10-29T11:54:32+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://clhjoe.github.io/post/</loc>
-    <lastmod>2019-10-29T11:54:32+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://clhjoe.github.io/tags/</loc>
     <lastmod>2019-10-29T11:54:32+08:00</lastmod>
   </url>
   
@@ -83,11 +108,6 @@
   </url>
   
   <url>
-    <loc>https://clhjoe.github.io/tags/tips/</loc>
-    <lastmod>2019-10-22T10:53:54+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://clhjoe.github.io/tags/tool/</loc>
     <lastmod>2019-10-22T10:53:54+08:00</lastmod>
   </url>
@@ -109,11 +129,6 @@
   
   <url>
     <loc>https://clhjoe.github.io/post/migrate-api-to-go/</loc>
-    <lastmod>2019-10-20T19:26:31+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://clhjoe.github.io/tags/nginx/</loc>
     <lastmod>2019-10-20T19:26:31+08:00</lastmod>
   </url>
   
