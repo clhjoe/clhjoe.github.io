@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
+  <channel>
+    <title>ffmpeg on Joe&#39;s Notes</title>
+    <link>https://clhjoe.github.io/tags/ffmpeg/</link>
+    <description>Recent content in ffmpeg on Joe&#39;s Notes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-tw</language>
+    <lastBuildDate>Tue, 31 Dec 2019 22:44:35 +0800</lastBuildDate>
+    
+	<atom:link href="https://clhjoe.github.io/tags/ffmpeg/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Video Streaming Architecture</title>
+      <link>https://clhjoe.github.io/post/video-streaming-architecture/</link>
+      <pubDate>Tue, 31 Dec 2019 22:44:35 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/video-streaming-architecture/</guid>
+      <description>影片需求 整個流程主要分成四段
+ 上傳 轉檔
+ 儲存 色情辨識  儲存與色情辨識比較沒有什麼問題，要嘛把須辨識的檔案存到S3要嘛存到EFS後非同步的辨識影片內容。接下來討論前兩個階段的方案。
+上傳影片方案 上傳到系統分主要有三種方式
+ Solution 1: 透過API取得S3 signed URL網址後客戶端將影片上傳到S3, 而這個API可以是API Gateway+Lambda or 自己的API伺服器。  Solution 2: 客戶端直接將影片透過API上傳到後端 Solution 3: 在API gateway開一個API然後傳送到Lambda處理     比較項目 S3 sign URL 直接上傳 API Gateway+Lambda     頻寬損耗 S3頻寬大，不消耗自有系統頻寬 佔用API伺服器頻寬 不佔用API頻寬但Lambda頻寬不確定   運算負擔 幾乎沒有消耗 消耗API伺服器運算 完全不消耗API伺服器運算   維護成本 小(S3資料傳入頻寬免費, 每次上傳$0.0000051) 小量無須新增伺服器 稍高   開發成本 中 低 不可行   擴充性 適用任何Scale需求 須隨使用量調整 不可行   限制 上傳完成後須再額外通知後台，共需3次API呼叫 伺服器須隨使用量調整 API 上傳上限10MB    處理轉檔方案 轉檔可以使用AWS的解決方案或者是自己處理。</description>
+    </item>
+    
+  </channel>
+</rss>

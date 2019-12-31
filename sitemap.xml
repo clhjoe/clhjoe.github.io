@@ -3,32 +3,62 @@
   xmlns:xhtml="https://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://clhjoe.github.io/tags/golang/</loc>
-    <lastmod>2019-12-31T22:34:10+08:00</lastmod>
+    <loc>https://clhjoe.github.io/tags/amazon/</loc>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://clhjoe.github.io/post/golang-devlopment-guideline/</loc>
-    <lastmod>2019-12-31T22:34:10+08:00</lastmod>
+    <loc>https://clhjoe.github.io/tags/aws/</loc>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/ffmpeg/</loc>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/golang/</loc>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://clhjoe.github.io/</loc>
-    <lastmod>2019-12-31T22:34:10+08:00</lastmod>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://clhjoe.github.io/post/</loc>
-    <lastmod>2019-12-31T22:34:10+08:00</lastmod>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/s3/</loc>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://clhjoe.github.io/tags/</loc>
-    <lastmod>2019-12-31T22:34:10+08:00</lastmod>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://clhjoe.github.io/tags/tips/</loc>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/tags/video/</loc>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/post/video-streaming-architecture/</loc>
+    <lastmod>2019-12-31T22:44:35+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://clhjoe.github.io/post/golang-devlopment-guideline/</loc>
     <lastmod>2019-12-31T22:34:10+08:00</lastmod>
   </url>
   
@@ -50,11 +80,6 @@
   <url>
     <loc>https://clhjoe.github.io/tags/php-fpm/</loc>
     <lastmod>2019-12-31T22:24:10+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://clhjoe.github.io/tags/aws/</loc>
-    <lastmod>2019-10-29T11:54:32+08:00</lastmod>
   </url>
   
   <url>
