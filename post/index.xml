@@ -6,10 +6,25 @@
     <description>Recent content in Posts on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Tue, 31 Dec 2019 22:24:10 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 31 Dec 2019 22:34:10 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Golang Development Guideline</title>
+      <link>https://clhjoe.github.io/post/golang-devlopment-guideline/</link>
+      <pubDate>Tue, 31 Dec 2019 22:34:10 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/golang-devlopment-guideline/</guid>
+      <description>1. 使用uber-go/zap 來印出Log a. zap是性能非常好的log套件，避免過度alloc memory及非同步的操作log可以大幅度的避免影響程式效能 b. 使用zap來取代fmt.Print c. 避免在zap.Debug中使用fmt.Sprintf(fmt.Sprintf仍是消耗較大的API)  DON&amp;rsquo;tDO 
+fmt.Println(&amp;#34;phoneNumber %s&amp;#34;, phoneNumber) OR
+import &amp;#34;uber-go/zap&amp;#34; zap.Debug(fmt.Sprintf(&amp;#34;Update phone number %d &amp;#34;, phoneNumber))  
+import &amp;#34;uber-go/zap&amp;#34; zap.Debug(&amp;#34;Update phone number&amp;#34;, zap.String(&amp;#34;phone_number&amp;#34;, phoneNumber))   
+2. 使用defer來釋放資源 a. 很大程度的避免漏掉關閉或移除建立的資源  DON&amp;rsquo;tDO 
+tx := core.DB.Begin() err = models.ResetPhone(tx, cInfo.UIDStr, &amp;#34;0&amp;#34;, false) if err != nil { tx.Rollback() } else { tx.Commit() }  
+tx := core.DB.Begin() defer func (){ if err !</description>
+    </item>
     
     <item>
       <title>PHP Process Tuning</title>
