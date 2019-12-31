@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
+  <channel>
+    <title>performance on Joe&#39;s Notes</title>
+    <link>https://clhjoe.github.io/tags/performance/</link>
+    <description>Recent content in performance on Joe&#39;s Notes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-tw</language>
+    <lastBuildDate>Tue, 31 Dec 2019 23:25:42 +0800</lastBuildDate>
+    
+	<atom:link href="https://clhjoe.github.io/tags/performance/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Redis Performance Optimization</title>
+      <link>https://clhjoe.github.io/post/redis-performance-optimization/</link>
+      <pubDate>Tue, 31 Dec 2019 23:25:42 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/redis-performance-optimization/</guid>
+      <description>1. 使用Pipeline Redis client跟server之間的溝通是透過TCP來傳輸。每一次的command都有TCP連線傳輸的代價。因此如果有多個command要執行，可以藉由pipeline來減少TCP的overhead.
+&amp;lt;?php $pipe = $redis-&amp;gt;multi(Redis::PIPELINE); for ($i = 0; $i &amp;lt; 10000; $i++) { $pipe-&amp;gt;set(&amp;#34;key::$i&amp;#34;, str_pad($i, 4, &amp;#39;0&amp;#39;, 0)); $pipe-&amp;gt;get(&amp;#34;key::$i&amp;#34;); } $replies = $pipe-&amp;gt;exec();  2. 使用 multi-argument commands 因為Redis是single process的程式，因此當一瞬間湧入大量的command時，你會發現平均的latency變長了。這是因為command必須等待前面的command被執行完才輪的到他。因此很明顯的，當如果同時有大量的操作時，使用可同時對多個key/filed操作的command將可以改善這個問題。 例如
+set key1 val1 set key2 val2 改成更有效率的方式
+mset key1 val1 key2 val2 下面條列出原始和對應優化的方案：
+   SingleArgumentCommand Single-Argument Description Multi-Argument Alternative Multi-Argument Description     SET set the value of key MSET Set multiple keys to multiple values   GET get the value of key MGET Get the values of all the given keys   LSET set value of an element in a list LPUSH/RPUSH Prepend/append multiple values to a list   LINDEX get an element from a list LRANGE Get a range of elements from a list   HSET set the string value of a hash HMSET Set multiple hash fields to multiple values   HGET get the value of a hash field HMGET Get the values of all the given hash fields    3.</description>
+    </item>
+    
+  </channel>
+</rss>
