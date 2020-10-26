@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="Mysql Scan Index vs. Scan Table" />
-    <meta property="og:title" content="Mysql Scan Index vs. Scan Table" />
-    <meta property="twitter:title" content="Mysql Scan Index vs. Scan Table" />
+    <meta name="title" content="AWS RDS MySQL Performance Monotor" />
+    <meta property="og:title" content="AWS RDS MySQL Performance Monotor" />
+    <meta property="twitter:title" content="AWS RDS MySQL Performance Monotor" />
     
 
     
-    <meta name="description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？">
-    <meta property="og:description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？" />
-    <meta property="twitter:description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？" />
+    <meta name="description" content="備忘錄..">
+    <meta property="og:description" content="備忘錄.." />
+    <meta property="twitter:description" content="備忘錄.." />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="backend,aws,docker,golang,tech,">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>Mysql Scan Index vs. Scan Table-Joe 的備忘錄 | Joe&#39;s Blog</title>
+    <title>AWS RDS MySQL Performance Monotor-Joe 的備忘錄 | Joe&#39;s Blog</title>
 
-    <link rel="canonical" href="/post/mysql-scan-index-vs-scan-table/">
+    <link rel="canonical" href="/post/aws-rds-mysql-performance-monitor/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -163,8 +163,12 @@
                             mysql
                         </a>
                         
+                        <a class="tag" href="/tags/rds" title="RDS">
+                            RDS
+                        </a>
+                        
                     </div>
-                    <h1>Mysql Scan Index vs. Scan Table</h1>
+                    <h1>AWS RDS MySQL Performance Monotor</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by 
@@ -200,63 +204,9 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
-                <nav id="TableOfContents">
-<ul>
-<li><a href="#故事開始">故事開始</a></li>
-<li><a href="#深入了解">深入了解</a>
-<ul>
-<li><a href="#full-table-scan">Full Table Scan</a></li>
-<li><a href="#full-index-scan">Full Index Scan</a></li>
-</ul></li>
-<li><a href="#結論">結論</a></li>
-</ul>
-</nav>
                 
                 
-
-<h1 id="故事開始">故事開始</h1>
-
-<p>假設我們有一個表紀錄著所有 APP 下的所有用戶的FCM token如下:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="o">`</span><span class="n">fcm_token</span><span class="o">`</span> <span class="p">(</span>
-  <span class="o">`</span><span class="n">id</span><span class="o">`</span> <span class="nb">int</span> <span class="n">unsigned</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span>
-  <span class="o">`</span><span class="n">appid</span><span class="o">`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="n">unsigned</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
-  <span class="o">`</span><span class="n">token</span><span class="o">`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="s1">&#39;,
-</span><span class="s1">  PRIMARY KEY (`id`),
-</span><span class="s1">  UNIQUE KEY `uniq_unique_pair` (`appid`,`token`(225),`uid`)
-</span><span class="s1">)ENGINE=InnoDB  DEFAULT CHARSET=utf8;</span></code></pre></div>
-<p>當今天我們想要對某個APP下的所有用戶做推送，顯然我們需要Query出所有該APP下所有的Token</p>
-<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span><span class="n">token</span> <span class="k">FROM</span> <span class="n">fcm_token</span> <span class="k">WHERE</span> <span class="n">appid</span> <span class="o">=</span> <span class="n">xxx</span><span class="p">;</span></code></pre></div>
-<p>這時候，根據教科書，我們如果對APPID做Index應該可以提昇效能。而且也因為我們建了 Unique Key: <strong>uniq_unique_pair</strong> 所以根據 <strong>EXPLAIN</strong> MySQL使用了這個INDEX。</p>
-
-<p>但現實是殘酷的，在AWS的環境中，我們比較上面的SQL 跟 <strong>不使用INDEX</strong> 的Query 也就是:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span><span class="n">token</span> <span class="k">FROM</span> <span class="n">fcm_token</span> <span class="n">USE</span> <span class="k">INDEX</span><span class="p">()</span> <span class="k">WHERE</span> <span class="n">appid</span> <span class="o">=</span> <span class="n">xxx</span><span class="p">;</span></code></pre></div>
-<p>我們發現後者的效能居然是前者的10倍以上(1,000~2,500 rows/sec vs.  38,000~45,000 rows/sec)，到底發生什麼事了呢！！？？</p>
-
-<h1 id="深入了解">深入了解</h1>
-
-<h2 id="full-table-scan">Full Table Scan</h2>
-
-<p>兩個SQL很明顯的差別就是在一個用了 INDEX 一個沒使用INDEX。在不使用INDEX 的情況下， MySQL 會全表掃描(Full Table Scan)，也就是會掃描每一筆資料再根據條件過濾，而這個動作是 <strong>sequential reads</strong> ，相對於 <strong>random reads</strong> 來說是非常快的操作。缺點是不管下什麼條件，都必須掃描每一個 row, 所以整個 Table 撈出來 跟 符合條件只有 10 筆， 時間是沒有太大的差異的。</p>
-
-<h2 id="full-index-scan">Full Index Scan</h2>
-
-<p>以 MySQL為例，Index 是 B+的結構。特點是 葉節點存放的是 Row的 Address而不是 Row本身的資料。因此掃描 Index是 <strong>sequential reads</strong> 但是讀取該筆的 <strong>token</strong> 必須跳到葉節點紀錄的 address來取得資料，而這個操作是 <strong>random read</strong> 因此 N筆資料會產生額外的 N 次的 random reads 所以速度就慢了。 相反的如果符合的筆數少，因為有 Index 不需要掃描全部的 Rows, 也因為筆數少， random reads也變少，所以速度就會比較快。</p>
-
-<h1 id="結論">結論</h1>
-
-<p>如果符合條件的筆數少可以考慮使用 Index 來加快速度，但如果筆數大超過一個量級則全表掃描反而會更快！</p>
-
-<p>另個思路是，如果我們把token 放在 Index呢？ 因為 token放在 Index 也就是 B+ Tree裡，在掃描 Index的時候不需要額外的 random read，所以速度自然而然可以比 Full table scan 更快。 同理，假設需要根據 ID 排序， 如果量大 MySQL 需要做 filesort，是一個耗時的操作，如果把 ID也放到 Index中 就可以避免 filesort了。
-但缺點是</p>
-
-<ol>
-<li>過多的Index會影響寫入跟更新的速度</li>
-<li>Index 的資料有長度限制
-<br /></li>
-</ol>
-
-<p>所以具體怎麼選擇，還是得依照業務特性來設計了。</p>
-
+                
 
                 
                 
@@ -303,13 +253,13 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/redis-performance-optimization/" data-toggle="tooltip" data-placement="top" title="Redis Performance Optimization">&larr;
+                        <a href="/post/mysql-scan-index-vs-scan-table/" data-toggle="tooltip" data-placement="top" title="Mysql Scan Index vs. Scan Table">&larr;
                             Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/post/aws-rds-mysql-performance-monitor/" data-toggle="tooltip" data-placement="top" title="AWS RDS MySQL Performance Monotor">Next
+                        <a href="/post/mysql-performance-monotor/" data-toggle="tooltip" data-placement="top" title="AWS RDS MySQL Performance Monitor">Next
                             Post &rarr;</a>
                     </li>
                     

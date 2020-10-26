@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="Mysql Scan Index vs. Scan Table" />
-    <meta property="og:title" content="Mysql Scan Index vs. Scan Table" />
-    <meta property="twitter:title" content="Mysql Scan Index vs. Scan Table" />
+    <meta name="title" content="AWS RDS MySQL Performance Monitor" />
+    <meta property="og:title" content="AWS RDS MySQL Performance Monitor" />
+    <meta property="twitter:title" content="AWS RDS MySQL Performance Monitor" />
     
 
     
-    <meta name="description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？">
-    <meta property="og:description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？" />
-    <meta property="twitter:description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？" />
+    <meta name="description" content="當你的業務因為資料庫卡住效能，看了看 Slow Query 看不出所以然只好放生嗎？ 來來，我們繼續看下去">
+    <meta property="og:description" content="當你的業務因為資料庫卡住效能，看了看 Slow Query 看不出所以然只好放生嗎？ 來來，我們繼續看下去" />
+    <meta property="twitter:description" content="當你的業務因為資料庫卡住效能，看了看 Slow Query 看不出所以然只好放生嗎？ 來來，我們繼續看下去" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="backend,aws,docker,golang,tech,">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>Mysql Scan Index vs. Scan Table-Joe 的備忘錄 | Joe&#39;s Blog</title>
+    <title>AWS RDS MySQL Performance Monitor-Joe 的備忘錄 | Joe&#39;s Blog</title>
 
-    <link rel="canonical" href="/post/mysql-scan-index-vs-scan-table/">
+    <link rel="canonical" href="/post/mysql-performance-monotor/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -163,8 +163,12 @@
                             mysql
                         </a>
                         
+                        <a class="tag" href="/tags/rds" title="RDS">
+                            RDS
+                        </a>
+                        
                     </div>
-                    <h1>Mysql Scan Index vs. Scan Table</h1>
+                    <h1>AWS RDS MySQL Performance Monitor</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by 
@@ -202,60 +206,83 @@
                 </header>
                 <nav id="TableOfContents">
 <ul>
-<li><a href="#故事開始">故事開始</a></li>
-<li><a href="#深入了解">深入了解</a>
+<li>
 <ul>
-<li><a href="#full-table-scan">Full Table Scan</a></li>
-<li><a href="#full-index-scan">Full Index Scan</a></li>
+<li><a href="#slow-query">Slow Query</a></li>
+<li><a href="#iops">IOPS</a></li>
+<li><a href="#network-bandwidth-latency">Network Bandwidth &amp; Latency</a></li>
+<li><a href="#cpu-memory">CPU, Memory</a></li>
+<li><a href="#client-連接數">Client 連接數</a></li>
 </ul></li>
-<li><a href="#結論">結論</a></li>
 </ul>
 </nav>
                 
                 
 
-<h1 id="故事開始">故事開始</h1>
+<p>資料庫跟你我寫的程式一樣，他也是跑在機器上(不是 虛擬 就是 實體)，因此監控或排查資料庫效能跟排查自己的程式是非常類似的。在 AWS RDS 中，當遇到效能問題時，我們應該排查哪些指標呢？</p>
 
-<p>假設我們有一個表紀錄著所有 APP 下的所有用戶的FCM token如下:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="o">`</span><span class="n">fcm_token</span><span class="o">`</span> <span class="p">(</span>
-  <span class="o">`</span><span class="n">id</span><span class="o">`</span> <span class="nb">int</span> <span class="n">unsigned</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span>
-  <span class="o">`</span><span class="n">appid</span><span class="o">`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="n">unsigned</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
-  <span class="o">`</span><span class="n">token</span><span class="o">`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="s1">&#39;,
-</span><span class="s1">  PRIMARY KEY (`id`),
-</span><span class="s1">  UNIQUE KEY `uniq_unique_pair` (`appid`,`token`(225),`uid`)
-</span><span class="s1">)ENGINE=InnoDB  DEFAULT CHARSET=utf8;</span></code></pre></div>
-<p>當今天我們想要對某個APP下的所有用戶做推送，顯然我們需要Query出所有該APP下所有的Token</p>
-<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span><span class="n">token</span> <span class="k">FROM</span> <span class="n">fcm_token</span> <span class="k">WHERE</span> <span class="n">appid</span> <span class="o">=</span> <span class="n">xxx</span><span class="p">;</span></code></pre></div>
-<p>這時候，根據教科書，我們如果對APPID做Index應該可以提昇效能。而且也因為我們建了 Unique Key: <strong>uniq_unique_pair</strong> 所以根據 <strong>EXPLAIN</strong> MySQL使用了這個INDEX。</p>
+<h2 id="slow-query">Slow Query</h2>
 
-<p>但現實是殘酷的，在AWS的環境中，我們比較上面的SQL 跟 <strong>不使用INDEX</strong> 的Query 也就是:</p>
-<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span><span class="n">token</span> <span class="k">FROM</span> <span class="n">fcm_token</span> <span class="n">USE</span> <span class="k">INDEX</span><span class="p">()</span> <span class="k">WHERE</span> <span class="n">appid</span> <span class="o">=</span> <span class="n">xxx</span><span class="p">;</span></code></pre></div>
-<p>我們發現後者的效能居然是前者的10倍以上(1,000~2,500 rows/sec vs.  38,000~45,000 rows/sec)，到底發生什麼事了呢！！？？</p>
+<p>遇到效能不好第一個看下 <strong>Slow query</strong> 並搭配 <strong>Explain</strong> 來判斷是不是 Index 沒命中甚至根本沒設 Index @@。另外藉由優化 SQL 語句不僅能提昇速度更能降低資料庫負載。
+<strong>[解法]</strong> 妥善設置 Index 並 優化 SQL 語句</p>
 
-<h1 id="深入了解">深入了解</h1>
+<h2 id="iops">IOPS</h2>
 
-<h2 id="full-table-scan">Full Table Scan</h2>
-
-<p>兩個SQL很明顯的差別就是在一個用了 INDEX 一個沒使用INDEX。在不使用INDEX 的情況下， MySQL 會全表掃描(Full Table Scan)，也就是會掃描每一筆資料再根據條件過濾，而這個動作是 <strong>sequential reads</strong> ，相對於 <strong>random reads</strong> 來說是非常快的操作。缺點是不管下什麼條件，都必須掃描每一個 row, 所以整個 Table 撈出來 跟 符合條件只有 10 筆， 時間是沒有太大的差異的。</p>
-
-<h2 id="full-index-scan">Full Index Scan</h2>
-
-<p>以 MySQL為例，Index 是 B+的結構。特點是 葉節點存放的是 Row的 Address而不是 Row本身的資料。因此掃描 Index是 <strong>sequential reads</strong> 但是讀取該筆的 <strong>token</strong> 必須跳到葉節點紀錄的 address來取得資料，而這個操作是 <strong>random read</strong> 因此 N筆資料會產生額外的 N 次的 random reads 所以速度就慢了。 相反的如果符合的筆數少，因為有 Index 不需要掃描全部的 Rows, 也因為筆數少， random reads也變少，所以速度就會比較快。</p>
-
-<h1 id="結論">結論</h1>
-
-<p>如果符合條件的筆數少可以考慮使用 Index 來加快速度，但如果筆數大超過一個量級則全表掃描反而會更快！</p>
-
-<p>另個思路是，如果我們把token 放在 Index呢？ 因為 token放在 Index 也就是 B+ Tree裡，在掃描 Index的時候不需要額外的 random read，所以速度自然而然可以比 Full table scan 更快。 同理，假設需要根據 ID 排序， 如果量大 MySQL 需要做 filesort，是一個耗時的操作，如果把 ID也放到 Index中 就可以避免 filesort了。
-但缺點是</p>
+<p>在 RDS 的儲存上一般我們會選擇 <strong>General Purpose SSD</strong> 或 <strong>Provisioned IOPS</strong> 應該很少人會選磁帶吧＠＠</p>
 
 <ol>
-<li>過多的Index會影響寫入跟更新的速度</li>
-<li>Index 的資料有長度限制
+<li><p><strong>General Purpose SSD</strong> 在這篇文章撰寫的時候，100GB以下 IOPS上限是 100, 100GB以上是每1 GB 有 3 IOPS (所以 200 GB 有 200*3=600 IOPS) 上限是 16,000，有額外的 Burst 來應付突發的 IO。</p></li>
+
+<li><p><strong>Provisioned IOPS</strong> 就是看你買了多少 IOPS 就多少</p></li>
+</ol>
+
+<p>因此，在遇到效能瓶頸的時候也要關注下 Read/Write IOPS有沒有超過你的上限，如果超過了當然效能就上不去了。</p>
+
+<p><strong>[解法]</strong></p>
+
+<ol>
+<li>提升 Storage 大小或買更多的 IOPS。</li>
+<li>背景處理使用 Read slave 來降低主庫負載
 <br /></li>
 </ol>
 
-<p>所以具體怎麼選擇，還是得依照業務特性來設計了。</p>
+<h2 id="network-bandwidth-latency">Network Bandwidth &amp; Latency</h2>
+
+<ol>
+<li><strong>Bandwidth：</strong> 每一台 Instance的 <strong>Bandwidth</strong> 都是有上限的，所以當然要看一下你的機器頻寬使用率有沒有超過上限。</li>
+<li><strong>EBS Optimized?</strong> 有一點容易被忽略的是 EBS 佔用頻寬，RDS 幾乎都是掛載到 EBS上，但 EBS是透過網路的儲存所以當然就會有頻寬的問題。新一代的 Instance(例如 m<strong>4</strong>, c<strong>4</strong>, m5, c6 &hellip;) 就是數字 <strong>4</strong> 以上的基本上預設都是 <strong>EBS optimized</strong> 也就是 EBS是有獨立的網路頻寬不佔用 Instance的頻寬。但 數字是 <strong>3</strong> 的例如(m<strong>3</strong>, c<strong>3</strong>) 要看規格，有些是支援但要另外開啟有些是根本就不支援(所以會佔用 Instance頻寬)。 如果頻寬不夠用了，只有升級一條路了。</li>
+<li><strong>Latency</strong> 通常會建議 Client 跟 DB 在同一個 Region下，如果你的 Client 跟 DB 是跨 Region 或甚至 跨了一個洋，那速度絕對是慢一個量級的。</li>
+</ol>
+
+<p><strong>[解法]</strong></p>
+
+<ol>
+<li>升級至新世代支援 EBS optimized 的 Instance 或 scale up 來提昇頻寬上限</li>
+<li>使用 Read Slave避免影響主庫寫入
+<br /></li>
+</ol>
+
+<h2 id="cpu-memory">CPU, Memory</h2>
+
+<p>CPU 高通常跟 SQL 的 <strong>量</strong> 和 <strong>寫法</strong> 有關。資料庫操作頻繁當然會提昇 CPU的使用率。 Memory 則跟 Server的 cache大小及連接數多寡有關。如果發生記憶體使用率過高導致開始使用 Swap 速度無法避免一定會掉下來了。</p>
+
+<p><strong>[解法]</strong></p>
+
+<ol>
+<li>在資料庫前加個 Cache來降低資料庫的存取</li>
+<li>妥善設置 連接數 上限 及 連線逾時</li>
+<li>妥善設置資料庫暫存大小
+<br /></li>
+</ol>
+
+<h2 id="client-連接數">Client 連接數</h2>
+
+<p>為了避免連接數過高，在資料庫設定上通常要設 Pool 上限及 Timeout。 但對於客戶端來說，如果 Server 連接數滿了導致無法連接 或是 Timeout時間過短導致頻繁的重新連接都會大大的影響效能。
+<strong>[解法]</strong></p>
+
+<ol>
+<li>客戶端使用 connection pool 或 長連接 並妥善的設置 pool大小及 idle timeout時間</li>
+</ol>
 
 
                 
@@ -303,15 +330,10 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/post/redis-performance-optimization/" data-toggle="tooltip" data-placement="top" title="Redis Performance Optimization">&larr;
+                        <a href="/post/aws-rds-mysql-performance-monitor/" data-toggle="tooltip" data-placement="top" title="AWS RDS MySQL Performance Monotor">&larr;
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/aws-rds-mysql-performance-monitor/" data-toggle="tooltip" data-placement="top" title="AWS RDS MySQL Performance Monotor">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 

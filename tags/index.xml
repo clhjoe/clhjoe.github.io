@@ -6,7 +6,7 @@
     <description>Recent content in Tags on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Mon, 26 Oct 2020 13:44:40 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 26 Oct 2020 14:42:49 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,9 +14,18 @@
     <item>
       <title>mysql</title>
       <link>https://clhjoe.github.io/tags/mysql/</link>
-      <pubDate>Mon, 26 Oct 2020 13:44:40 +0800</pubDate>
+      <pubDate>Mon, 26 Oct 2020 14:42:49 +0800</pubDate>
       
       <guid>https://clhjoe.github.io/tags/mysql/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>RDS</title>
+      <link>https://clhjoe.github.io/tags/rds/</link>
+      <pubDate>Mon, 26 Oct 2020 14:42:49 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/tags/rds/</guid>
       <description></description>
     </item>
     
@@ -147,7 +156,7 @@
     </item>
     
     <item>
-      <title>linux</title>
+      <title>Linux</title>
       <link>https://clhjoe.github.io/tags/linux/</link>
       <pubDate>Tue, 29 Oct 2019 11:54:32 +0800</pubDate>
       
@@ -161,15 +170,6 @@
       <pubDate>Sat, 26 Oct 2019 00:00:00 +0000</pubDate>
       
       <guid>https://clhjoe.github.io/tags/network/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>rds</title>
-      <link>https://clhjoe.github.io/tags/rds/</link>
-      <pubDate>Sat, 26 Oct 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://clhjoe.github.io/tags/rds/</guid>
       <description></description>
     </item>
     

@@ -1,15 +1,38 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="https://www.w3.org/2005/Atom">
   <channel>
-    <title>rds on Joe&#39;s Notes</title>
+    <title>RDS on Joe&#39;s Notes</title>
     <link>https://clhjoe.github.io/tags/rds/</link>
-    <description>Recent content in rds on Joe&#39;s Notes</description>
+    <description>Recent content in RDS on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Sat, 26 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 26 Oct 2020 14:42:49 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/tags/rds/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>AWS RDS MySQL Performance Monitor</title>
+      <link>https://clhjoe.github.io/post/mysql-performance-monotor/</link>
+      <pubDate>Mon, 26 Oct 2020 14:42:49 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/mysql-performance-monotor/</guid>
+      <description>資料庫跟你我寫的程式一樣，他也是跑在機器上(不是 虛擬 就是 實體)，因此監控或排查資料庫效能跟排查自己的程式是非常類似的。在 AWS RDS 中，當遇到效能問題時，我們應該排查哪些指標呢？
+Slow Query 遇到效能不好第一個看下 Slow query 並搭配 Explain 來判斷是不是 Index 沒命中甚至根本沒設 Index @@。另外藉由優化 SQL 語句不僅能提昇速度更能降低資料庫負載。 [解法] 妥善設置 Index 並 優化 SQL 語句
+IOPS 在 RDS 的儲存上一般我們會選擇 General Purpose SSD 或 Provisioned IOPS 應該很少人會選磁帶吧＠＠
+ General Purpose SSD 在這篇文章撰寫的時候，100GB以下 IOPS上限是 100, 100GB以上是每1 GB 有 3 IOPS (所以 200 GB 有 200*3=600 IOPS) 上限是 16,000，有額外的 Burst 來應付突發的 IO。
+ Provisioned IOPS 就是看你買了多少 IOPS 就多少
+  因此，在遇到效能瓶頸的時候也要關注下 Read/Write IOPS有沒有超過你的上限，如果超過了當然效能就上不去了。</description>
+    </item>
+    
+    <item>
+      <title>AWS RDS MySQL Performance Monotor</title>
+      <link>https://clhjoe.github.io/post/aws-rds-mysql-performance-monitor/</link>
+      <pubDate>Mon, 26 Oct 2020 14:42:49 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/aws-rds-mysql-performance-monitor/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Timeout原因整理-以Golang為例</title>
