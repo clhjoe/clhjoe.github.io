@@ -6,10 +6,23 @@
     <description>Recent content on Joe&#39;s Notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-tw</language>
-    <lastBuildDate>Tue, 31 Dec 2019 23:25:42 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 26 Oct 2020 13:44:40 +0800</lastBuildDate>
     
 	<atom:link href="https://clhjoe.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Mysql Scan Index vs. Scan Table</title>
+      <link>https://clhjoe.github.io/post/mysql-scan-index-vs-scan-table/</link>
+      <pubDate>Mon, 26 Oct 2020 13:44:40 +0800</pubDate>
+      
+      <guid>https://clhjoe.github.io/post/mysql-scan-index-vs-scan-table/</guid>
+      <description>故事開始 假設我們有一個表紀錄著所有 APP 下的所有用戶的FCM token如下:
+CREATE TABLE `fcm_token` ( `id` int unsigned NOT NULL AUTO_INCREMENT, `appid` int(10) unsigned NOT NULL, `token` varchar(255) NOT NULL&amp;#39;, PRIMARY KEY (`id`), UNIQUE KEY `uniq_unique_pair` (`appid`,`token`(225),`uid`) )ENGINE=InnoDB DEFAULT CHARSET=utf8; 當今天我們想要對某個APP下的所有用戶做推送，顯然我們需要Query出所有該APP下所有的Token
+SELECT id,token FROM fcm_token WHERE appid = xxx; 這時候，根據教科書，我們如果對APPID做Index應該可以提昇效能。而且也因為我們建了 Unique Key: uniq_unique_pair 所以根據 EXPLAIN MySQL使用了這個INDEX。
+但現實是殘酷的，在AWS的環境中，我們比較上面的SQL 跟 不使用INDEX 的Query 也就是:
+SELECT id,token FROM fcm_token USE INDEX() WHERE appid = xxx; 我們發現後者的效能居然是前者的10倍以上(1,000~2,500 rows/sec vs. 38,000~45,000 rows/sec)，到底發生什麼事了呢！！？？</description>
+    </item>
     
     <item>
       <title>Redis Performance Optimization</title>

@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="How to Use Hugo" />
-    <meta property="og:title" content="How to Use Hugo" />
-    <meta property="twitter:title" content="How to Use Hugo" />
+    <meta name="title" content="Mysql Scan Index vs. Scan Table" />
+    <meta property="og:title" content="Mysql Scan Index vs. Scan Table" />
+    <meta property="twitter:title" content="Mysql Scan Index vs. Scan Table" />
     
 
     
-    <meta name="description" content="Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了">
-    <meta property="og:description" content="Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了" />
-    <meta property="twitter:description" content="Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了" />
+    <meta name="description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？">
+    <meta property="og:description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？" />
+    <meta property="twitter:description" content="業務上我們有機會需要根據條件在MySQL中把符合條件的資料 Query 出來，教科書總是告訴我們 Index 可以提昇 Query 速度，但真的是這樣嗎？" />
     
 
     
@@ -34,9 +34,9 @@
     <meta name="keyword"  content="backend,aws,docker,golang,tech,">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>How to Use Hugo-Joe 的備忘錄 | Joe&#39;s Blog</title>
+    <title>Mysql Scan Index vs. Scan Table-Joe 的備忘錄 | Joe&#39;s Blog</title>
 
-    <link rel="canonical" href="/post/how-to-use-hugo/">
+    <link rel="canonical" href="/post/mysql-scan-index-vs-scan-table/">
 
     <link rel="stylesheet" href="/css/iDisqus.min.css"/>
 	
@@ -159,16 +159,12 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/tips" title="tips">
-                            tips
-                        </a>
-                        
-                        <a class="tag" href="/tags/hugo" title="hugo">
-                            hugo
+                        <a class="tag" href="/tags/mysql" title="mysql">
+                            mysql
                         </a>
                         
                     </div>
-                    <h1>How to Use Hugo</h1>
+                    <h1>Mysql Scan Index vs. Scan Table</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by 
@@ -176,7 +172,7 @@
                                 Joe&#39;s Notes
                          
                         on 
-                        Sunday, October 13, 2019
+                        Monday, October 26, 2020
                         
                         
                         
@@ -206,79 +202,60 @@
                 </header>
                 <nav id="TableOfContents">
 <ul>
-<li>
+<li><a href="#故事開始">故事開始</a></li>
+<li><a href="#深入了解">深入了解</a>
 <ul>
-<li><a href="#甚麼是hugo">甚麼是Hugo?</a></li>
-<li><a href="#安裝hugo">安裝Hugo</a></li>
-<li><a href="#建立新的網站">建立新的網站</a></li>
-<li><a href="#使用theme">使用Theme</a></li>
-<li><a href="#新增一篇內文">新增一篇內文</a></li>
-<li><a href="#預覽一下網站吧">預覽一下網站吧</a></li>
-<li><a href="#放置到github">放置到github</a></li>
+<li><a href="#full-table-scan">Full Table Scan</a></li>
+<li><a href="#full-index-scan">Full Index Scan</a></li>
 </ul></li>
+<li><a href="#結論">結論</a></li>
 </ul>
 </nav>
                 
                 
 
-<h2 id="甚麼是hugo">甚麼是Hugo?</h2>
+<h1 id="故事開始">故事開始</h1>
 
-<p>Hugo是一個靜態網頁產生的工具。你可以透過markdown編輯內容，透過現成的theme或自己撰寫，Hugo可以將你編輯的內容轉為靜態網頁。而放置這些靜態網頁最方便的方法莫過於github.io了。</p>
+<p>假設我們有一個表紀錄著所有 APP 下的所有用戶的FCM token如下:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="o">`</span><span class="n">fcm_token</span><span class="o">`</span> <span class="p">(</span>
+  <span class="o">`</span><span class="n">id</span><span class="o">`</span> <span class="nb">int</span> <span class="n">unsigned</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="n">AUTO_INCREMENT</span><span class="p">,</span>
+  <span class="o">`</span><span class="n">appid</span><span class="o">`</span> <span class="nb">int</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="n">unsigned</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+  <span class="o">`</span><span class="n">token</span><span class="o">`</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="s1">&#39;,
+</span><span class="s1">  PRIMARY KEY (`id`),
+</span><span class="s1">  UNIQUE KEY `uniq_unique_pair` (`appid`,`token`(225),`uid`)
+</span><span class="s1">)ENGINE=InnoDB  DEFAULT CHARSET=utf8;</span></code></pre></div>
+<p>當今天我們想要對某個APP下的所有用戶做推送，顯然我們需要Query出所有該APP下所有的Token</p>
+<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span><span class="n">token</span> <span class="k">FROM</span> <span class="n">fcm_token</span> <span class="k">WHERE</span> <span class="n">appid</span> <span class="o">=</span> <span class="n">xxx</span><span class="p">;</span></code></pre></div>
+<p>這時候，根據教科書，我們如果對APPID做Index應該可以提昇效能。而且也因為我們建了 Unique Key: <strong>uniq_unique_pair</strong> 所以根據 <strong>EXPLAIN</strong> MySQL使用了這個INDEX。</p>
 
-<h2 id="安裝hugo">安裝Hugo</h2>
+<p>但現實是殘酷的，在AWS的環境中，我們比較上面的SQL 跟 <strong>不使用INDEX</strong> 的Query 也就是:</p>
+<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">id</span><span class="p">,</span><span class="n">token</span> <span class="k">FROM</span> <span class="n">fcm_token</span> <span class="n">USE</span> <span class="k">INDEX</span><span class="p">()</span> <span class="k">WHERE</span> <span class="n">appid</span> <span class="o">=</span> <span class="n">xxx</span><span class="p">;</span></code></pre></div>
+<p>我們發現後者的效能居然是前者的10倍以上(1,000~2,500 rows/sec vs.  38,000~45,000 rows/sec)，到底發生什麼事了呢！！？？</p>
 
-<p><strong>For Mac</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">brew install hugo</code></pre></div>
-<p><strong>For Linux</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">snap install hugo --channel<span class="o">=</span>extended
+<h1 id="深入了解">深入了解</h1>
 
-or 
+<h2 id="full-table-scan">Full Table Scan</h2>
 
-sudo apt-get install hugo</code></pre></div>
-<h2 id="建立新的網站">建立新的網站</h2>
-<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1">#將new-site 替代成你要的網站名稱</span>
-hugo new site new-site</code></pre></div>
-<h2 id="使用theme">使用Theme</h2>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1">#將new-site 替代成你的網站名稱,這裡以anake為例。</span>
-<span class="nb">cd</span> new-site
-git init
-git submodule add https://github.com/budparr/gohugo-theme-ananke.git themes/ananke
-<span class="nb">echo</span> <span class="s1">&#39;theme = &#34;ananke&#34;&#39;</span> &gt;&gt; config.toml</code></pre></div>
-<p>更多的Theme可以到 <a href="https://themes.gohugo.io/">https://themes.gohugo.io/</a> 參考</p>
+<p>兩個SQL很明顯的差別就是在一個用了 INDEX 一個沒使用INDEX。在不使用INDEX 的情況下， MySQL 會全表掃描(Full Table Scan)，也就是會掃描每一筆資料再根據條件過濾，而這個動作是 <strong>sequential reads</strong> ，相對於 <strong>random reads</strong> 來說是非常快的操作。缺點是不管下什麼條件，都必須掃描每一個 row, 所以整個 Table 撈出來 跟 符合條件只有 10 筆， 時間是沒有太大的差異的。</p>
 
-<h2 id="新增一篇內文">新增一篇內文</h2>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">hugo new posts/my-first-post.md</code></pre></div>
-<p>執行後會在content/posts/ 產生這份md檔，直接編輯內容就好了。如果要刪除這篇文章，也可以直接刪除檔案即可。</p>
+<h2 id="full-index-scan">Full Index Scan</h2>
 
-<h2 id="預覽一下網站吧">預覽一下網站吧</h2>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">hugo server -D</code></pre></div>
-<p>執行後打開瀏覽器，輸入 <a href="https://localhost:1313/">https://localhost:1313/</a> 就可以預覽你的網站啦～</p>
+<p>以 MySQL為例，Index 是 B+的結構。特點是 葉節點存放的是 Row的 Address而不是 Row本身的資料。因此掃描 Index是 <strong>sequential reads</strong> 但是讀取該筆的 <strong>token</strong> 必須跳到葉節點紀錄的 address來取得資料，而這個操作是 <strong>random read</strong> 因此 N筆資料會產生額外的 N 次的 random reads 所以速度就慢了。 相反的如果符合的筆數少，因為有 Index 不需要掃描全部的 Rows, 也因為筆數少， random reads也變少，所以速度就會比較快。</p>
 
-<h2 id="放置到github">放置到github</h2>
+<h1 id="結論">結論</h1>
 
-<p>這邊比較tricky。假設你的github帳號是handsomeboy, 如果要把文章放到handsomeboy.github.io，你必須建立<strong>handsomeboy.github.io</strong> 這個repo然後把public這個資料夾(而非整個hugo網站資料夾)推到這個repo。那hugo資料夾的git要怎麼辦呢？你可以再建個repo放整個hugo資料夾。因此更新一個文章，你必須push到兩個repo～</p>
+<p>如果符合條件的筆數少可以考慮使用 Index 來加快速度，但如果筆數大超過一個量級則全表掃描反而會更快！</p>
+
+<p>另個思路是，如果我們把token 放在 Index呢？ 因為 token放在 Index 也就是 B+ Tree裡，在掃描 Index的時候不需要額外的 random read，所以速度自然而然可以比 Full table scan 更快。 同理，假設需要根據 ID 排序， 如果量大 MySQL 需要做 filesort，是一個耗時的操作，如果把 ID也放到 Index中 就可以避免 filesort了。
+但缺點是</p>
 
 <ol>
-<li>建立 <strong>handsomeboy.github.io</strong>(handsomeboy記得換成妳自己的帳號名稱) 及 hugo-web兩個repo。</li>
-
-<li><p>將public資料夾推到 <strong>handsomeboy.github.io</strong></p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">hugo   <span class="c1">#將md檔轉成靜態資料</span>
-<span class="nb">cd</span> public
-git init
-git remote add origin git@github.com:handsomeboy/handsomeboy.github.io.git
-git add .
-git commit 
-git push -u origin master
-   
-<span class="c1">#push完後打開瀏覽器輸入 https://handsomeboy.github.io 應該就要可以看到你的文章啦～(如果沒看到可以檢查一下.md檔，記得把開頭的drafte改成false)</span> </code></pre></div></li>
-
-<li><p>將hugo送進git</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="nb">cd</span> ..
-git remote add origin git@github.com:handsomeboy/hugo-web.git
-git add .
-git commit 
-git push -u origin master</code></pre></div></li>
+<li>過多的Index會影響寫入跟更新的速度</li>
+<li>Index 的資料有長度限制
+<br /></li>
 </ol>
+
+<p>所以具體怎麼選擇，還是得依照業務特性來設計了。</p>
 
 
                 
@@ -325,11 +302,11 @@ git push -u origin master</code></pre></div></li>
                 <hr>
                 <ul class="pager">
                     
-                    
-                    <li class="next">
-                        <a href="/post/multi-stage-docker-build-with-go-module/" data-toggle="tooltip" data-placement="top" title="Multi Stage Docker Build With Go Module">Next
-                            Post &rarr;</a>
+                    <li class="previous">
+                        <a href="/post/redis-performance-optimization/" data-toggle="tooltip" data-placement="top" title="Redis Performance Optimization">&larr;
+                            Previous Post</a>
                     </li>
+                    
                     
                 </ul>
 
