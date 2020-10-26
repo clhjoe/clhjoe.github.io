@@ -3,11 +3,6 @@
   xmlns:xhtml="https://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://clhjoe.github.io/post/mysql-performance-monotor/</loc>
-    <lastmod>2020-10-26T14:42:49+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://clhjoe.github.io/post/aws-rds-mysql-performance-monitor/</loc>
     <lastmod>2020-10-26T14:42:49+08:00</lastmod>
   </url>

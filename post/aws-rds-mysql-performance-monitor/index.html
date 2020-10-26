@@ -15,15 +15,15 @@
     
 
     
-    <meta name="title" content="AWS RDS MySQL Performance Monotor" />
-    <meta property="og:title" content="AWS RDS MySQL Performance Monotor" />
-    <meta property="twitter:title" content="AWS RDS MySQL Performance Monotor" />
+    <meta name="title" content="AWS RDS MySQL Performance Monitor" />
+    <meta property="og:title" content="AWS RDS MySQL Performance Monitor" />
+    <meta property="twitter:title" content="AWS RDS MySQL Performance Monitor" />
     
 
     
-    <meta name="description" content="備忘錄..">
-    <meta property="og:description" content="備忘錄.." />
-    <meta property="twitter:description" content="備忘錄.." />
+    <meta name="description" content="當你的業務因為資料庫卡住效能，看了看 Slow Query 看不出所以然只好放生嗎？ 來來，我們繼續看下去">
+    <meta property="og:description" content="當你的業務因為資料庫卡住效能，看了看 Slow Query 看不出所以然只好放生嗎？ 來來，我們繼續看下去" />
+    <meta property="twitter:description" content="當你的業務因為資料庫卡住效能，看了看 Slow Query 看不出所以然只好放生嗎？ 來來，我們繼續看下去" />
     
 
     
@@ -34,7 +34,7 @@
     <meta name="keyword"  content="backend,aws,docker,golang,tech,">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>AWS RDS MySQL Performance Monotor-Joe 的備忘錄 | Joe&#39;s Blog</title>
+    <title>AWS RDS MySQL Performance Monitor-Joe 的備忘錄 | Joe&#39;s Blog</title>
 
     <link rel="canonical" href="/post/aws-rds-mysql-performance-monitor/">
 
@@ -168,7 +168,7 @@
                         </a>
                         
                     </div>
-                    <h1>AWS RDS MySQL Performance Monotor</h1>
+                    <h1>AWS RDS MySQL Performance Monitor</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by 
@@ -204,9 +204,86 @@
                 <header>
                     <h2>TOC</h2>
                 </header>
+                <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#slow-query">Slow Query</a></li>
+<li><a href="#iops">IOPS</a></li>
+<li><a href="#network-bandwidth-latency">Network Bandwidth &amp; Latency</a></li>
+<li><a href="#cpu-memory">CPU, Memory</a></li>
+<li><a href="#client-連接數">Client 連接數</a></li>
+</ul></li>
+</ul>
+</nav>
                 
                 
-                
+
+<p>資料庫跟你我寫的程式一樣，他也是跑在機器上(不是 虛擬 就是 實體)，因此監控或排查資料庫效能跟排查自己的程式是非常類似的。在 AWS RDS 中，當遇到效能問題時，我們應該排查哪些指標呢？</p>
+
+<h2 id="slow-query">Slow Query</h2>
+
+<p>遇到效能不好第一個看下 <strong>Slow query</strong> 並搭配 <strong>Explain</strong> 來判斷是不是 Index 沒命中甚至根本沒設 Index @@。另外藉由優化 SQL 語句不僅能提昇速度更能降低資料庫負載。
+<strong>[解法]</strong> 妥善設置 Index 並 優化 SQL 語句</p>
+
+<h2 id="iops">IOPS</h2>
+
+<p>在 RDS 的儲存上一般我們會選擇 <strong>General Purpose SSD</strong> 或 <strong>Provisioned IOPS</strong> 應該很少人會選磁帶吧＠＠</p>
+
+<ol>
+<li><p><strong>General Purpose SSD</strong> 在這篇文章撰寫的時候，100GB以下 IOPS上限是 100, 100GB以上是每1 GB 有 3 IOPS (所以 200 GB 有 200*3=600 IOPS) 上限是 16,000，有額外的 Burst 來應付突發的 IO。</p></li>
+
+<li><p><strong>Provisioned IOPS</strong> 就是看你買了多少 IOPS 就多少</p></li>
+</ol>
+
+<p>因此，在遇到效能瓶頸的時候也要關注下 Read/Write IOPS有沒有超過你的上限，如果超過了當然效能就上不去了。</p>
+
+<p><strong>[解法]</strong></p>
+
+<ol>
+<li>提升 Storage 大小或買更多的 IOPS。</li>
+<li>背景處理使用 Read slave 來降低主庫負載
+<br /></li>
+</ol>
+
+<h2 id="network-bandwidth-latency">Network Bandwidth &amp; Latency</h2>
+
+<ol>
+<li><strong>Bandwidth：</strong> 每一台 Instance的 <strong>Bandwidth</strong> 都是有上限的，所以當然要看一下你的機器頻寬使用率有沒有超過上限。</li>
+<li><strong>EBS Optimized?</strong> 有一點容易被忽略的是 EBS 佔用頻寬，RDS 幾乎都是掛載到 EBS上，但 EBS是透過網路的儲存所以當然就會有頻寬的問題。新一代的 Instance(例如 m<strong>4</strong>, c<strong>4</strong>, m5, c6 &hellip;) 就是數字 <strong>4</strong> 以上的基本上預設都是 <strong>EBS optimized</strong> 也就是 EBS是有獨立的網路頻寬不佔用 Instance的頻寬。但 數字是 <strong>3</strong> 的例如(m<strong>3</strong>, c<strong>3</strong>) 要看規格，有些是支援但要另外開啟有些是根本就不支援(所以會佔用 Instance頻寬)。 如果頻寬不夠用了，只有升級一條路了。</li>
+<li><strong>Latency</strong> 通常會建議 Client 跟 DB 在同一個 Region下，如果你的 Client 跟 DB 是跨 Region 或甚至 跨了一個洋，那速度絕對是慢一個量級的。</li>
+</ol>
+
+<p><strong>[解法]</strong></p>
+
+<ol>
+<li>升級至新世代支援 EBS optimized 的 Instance 或 scale up 來提昇頻寬上限</li>
+<li>使用 Read Slave避免影響主庫寫入
+<br /></li>
+</ol>
+
+<h2 id="cpu-memory">CPU, Memory</h2>
+
+<p>CPU 高通常跟 SQL 的 <strong>量</strong> 和 <strong>寫法</strong> 有關。資料庫操作頻繁當然會提昇 CPU的使用率。 Memory 則跟 Server的 cache大小及連接數多寡有關。如果發生記憶體使用率過高導致開始使用 Swap 速度無法避免一定會掉下來了。</p>
+
+<p><strong>[解法]</strong></p>
+
+<ol>
+<li>在資料庫前加個 Cache來降低資料庫的存取</li>
+<li>妥善設置 連接數 上限 及 連線逾時</li>
+<li>妥善設置資料庫暫存大小
+<br /></li>
+</ol>
+
+<h2 id="client-連接數">Client 連接數</h2>
+
+<p>為了避免連接數過高，在資料庫設定上通常要設 Pool 上限及 Timeout。 但對於客戶端來說，如果 Server 連接數滿了導致無法連接 或是 Timeout時間過短導致頻繁的重新連接都會大大的影響效能。
+<strong>[解法]</strong></p>
+
+<ol>
+<li>客戶端使用 connection pool 或 長連接 並妥善的設置 pool大小及 idle timeout時間</li>
+</ol>
+
 
                 
                 
@@ -257,11 +334,6 @@
                             Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/post/mysql-performance-monotor/" data-toggle="tooltip" data-placement="top" title="AWS RDS MySQL Performance Monitor">Next
-                            Post &rarr;</a>
-                    </li>
                     
                 </ul>
 
